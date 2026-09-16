@@ -1,32 +1,32 @@
 import type { Metadata } from 'next';
-import { Syne, Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google';
+import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { SmoothScrollProvider } from '@/lib/smooth-scroll';
 
-const syne = Syne({
+const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-display',
-  weight: ['500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['300', '400', '500', '600', '700', '800'],
+  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
 });
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Grade X Commercial Solutions | WA's Premier Robotic Kitchen Exhaust Cleaning",
-  description: "Grade X operates Western Australia's only robotic kitchen exhaust cleaning technology. Precision duct inspection, grease thickness measurement, and verified fire compliance reporting.",
+  title: "Grade X Commercial Solutions | WA's Sole Robotic Kitchen Exhaust Cleaning",
+  description: "Western Australia's premier robotic commercial kitchen exhaust decontamination and AS 1851-2012 fire-safety compliance provider.",
 };
 
 export default function RootLayout({
@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${syne.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} scroll-smooth`}>
+    <html lang="en" className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}>
       <body className="bg-brand-obsidian text-slate-100 selection:bg-brand-gold/30 selection:text-brand-gold-light blueprint-grid relative">
         <SmoothScrollProvider>
           {children}

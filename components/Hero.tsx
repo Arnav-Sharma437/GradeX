@@ -4,71 +4,97 @@ import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Scan, ShieldCheck, Play, Pause, RefreshCw } from 'lucide-react';
+import { ArrowRight, Scan, ShieldCheck, Play, Pause, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const frameRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const overlayContentRef = useRef<HTMLDivElement>(null);
+  const hudMetricsRef = useRef<HTMLDivElement>(null);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [scrubProgress, setScrubProgress] = useState(0);
 
   useGSAP(
     () => {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const isMobile = window.innerWidth < 768;
-
-      // 1. Initial High-Impact Entrance Sequence
-      const tl = gsap.timeline();
-      tl.from('.hero-badge', { y: -30, opacity: 0, duration: 0.8, ease: 'power3.out' })
-        .from('.hero-headline', { y: 40, opacity: 0, duration: 1, ease: 'power3.out' }, '-=0.5')
-        .from('.hero-subline', { y: 30, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
-        .from('.hero-cta', { scale: 0.9, opacity: 0, duration: 0.7, ease: 'back.out(1.7)' }, '-=0.5')
-        .from('.hero-hud-frame', { y: 60, opacity: 0, duration: 1, ease: 'power3.out' }, '-=0.5');
-
       const video = videoRef.current;
       if (!video) return;
 
-      // Play video immediately
-      video.play().catch(() => {});
+      // Ensure video is paused so user scroll drives 100% of the playback
+      video.pause();
 
       if (prefersReducedMotion || isMobile) {
+        video.play().catch(() => {});
+        setIsPlaying(true);
         return;
       }
 
-      // 2. Video Viewport Scaling & Glow on Scroll
-      gsap.to(frameRef.current, {
-        scale: 0.88,
-        y: 40,
-        borderRadius: '24px',
-        borderColor: 'rgba(212, 175, 55, 0.8)',
-        boxShadow: '0 25px 70px -15px rgba(212, 175, 55, 0.35)',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1.2,
-        },
-      });
-
-      // 3. Scrub video playback based on scroll position
-      ScrollTrigger.create({
+      // PIN ENTIRE HERO FOR 300% OF VIEWPORT SCROLL (video must finish scrub before releasing)
+      const pinTrigger = ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top top',
-        end: 'bottom top',
+        end: '+=300%',
+        pin: true,
         scrub: 1,
+        anticipatePin: 1,
         onUpdate: (self) => {
+          setScrubProgress(Math.round(self.progress * 100));
+          if (progressBarRef.current) {
+            progressBarRef.current.style.width = `${self.progress * 100}%`;
+          }
           if (video && video.duration && !isNaN(video.duration)) {
             video.currentTime = self.progress * video.duration;
           }
         },
       });
+
+      // Overlay text transitions as user scrolls through the duct
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top top',
+          end: '+=300%',
+          scrub: 1,
+        },
+      });
+
+      // Phase 1: Headline fades & lifts out
+      tl.to(overlayContentRef.current, {
+        y: -100,
+        opacity: 0,
+        scale: 0.95,
+        ease: 'power1.in',
+      }, 0);
+
+      // Phase 2: Show Duct Telemetry Callouts mid-way through video
+      tl.fromTo(hudMetricsRef.current, {
+        opacity: 0,
+        scale: 0.85,
+        y: 60,
+      }, {
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        ease: 'power2.out',
+      }, 0.3);
+
+      tl.to(hudMetricsRef.current, {
+        opacity: 0,
+        y: -40,
+        ease: 'power2.in',
+      }, 0.8);
+
+      return () => {
+        pinTrigger.kill();
+      };
     },
     { scope: containerRef }
   );
 
-  const togglePlay = () => {
+  const toggleManualPlay = () => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
       videoRef.current.play();
@@ -80,151 +106,139 @@ export default function Hero() {
   };
 
   return (
-    <section ref={containerRef} className="relative min-h-screen flex flex-col items-center justify-start pt-10 pb-20 overflow-hidden" id="heroSection">
+    <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black" id="heroSection">
       
-      {/* Background Ambient Glows & Blueprint Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-brand-navy-light/40 rounded-full blur-[140px]"></div>
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[450px] h-[300px] bg-brand-gold/10 rounded-full blur-[100px]"></div>
+      {/* 1. FULL WIDTH / FULL VIEWPORT BACKGROUND VIDEO */}
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#03070E]">
+        <video
+          ref={videoRef}
+          src="/videos/hero-robot-clean.mp4"
+          poster="/images/hero-poster.jpg"
+          muted
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover opacity-80"
+        />
+        
+        {/* Cinematic Gradient Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-black/40 to-black/70 pointer-events-none" />
+        <div className="absolute inset-0 bg-radial-at-c from-transparent via-black/50 to-brand-obsidian pointer-events-none" />
+        
+        {/* Futuristic Blueprint Coordinate Grid Lines */}
+        <div className="absolute inset-0 pointer-events-none blueprint-grid opacity-30" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 w-full relative z-10 flex flex-col items-center text-center">
-        
+      {/* 2. TOP HUD BAR (TELEMETRY) */}
+      <div className="absolute top-20 inset-x-0 z-20 px-6 sm:px-12 flex justify-between items-center text-xs font-mono text-brand-gold-light pointer-events-none">
+        <div className="flex items-center gap-2 bg-black/60 border border-brand-border/40 px-3 py-1.5 rounded-full backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>ROBOTIC CRAWLER // LIVE DUCT PENETRATION</span>
+        </div>
+        <div className="hidden sm:flex items-center gap-4 bg-black/60 border border-brand-border/40 px-4 py-1.5 rounded-full backdrop-blur-md">
+          <span className="text-slate-400">DUCT REACH: <strong className="text-white">45M</strong></span>
+          <span className="text-slate-400">DEGREASE TEMP: <strong className="text-brand-gold">140°C</strong></span>
+          <span className="text-slate-400">SCRUB: <strong className="text-brand-gold-light">{scrubProgress}%</strong></span>
+        </div>
+      </div>
+
+      {/* 3. CENTER HERO HEADLINE & ACTIONS (Fades on scroll) */}
+      <div
+        ref={overlayContentRef}
+        className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 sm:px-8 pointer-events-auto"
+      >
         {/* WA Exclusivity Badge */}
-        <div className="hero-badge inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-brand-gold/40 bg-brand-navy/80 backdrop-blur-md mb-8 shadow-xl shadow-black/50">
-          <span className="flex h-2 w-2 relative">
+        <div className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full border border-brand-gold/50 bg-brand-navy/90 backdrop-blur-xl mb-6 shadow-2xl shadow-black/80">
+          <span className="flex h-2.5 w-2.5 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-gold opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-gold"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-gold"></span>
           </span>
-          <span className="text-xs font-mono uppercase tracking-widest text-brand-gold-light font-semibold">
+          <span className="text-xs sm:text-sm font-mono uppercase tracking-widest text-brand-gold-light font-bold">
             Western Australia's Sole Robotic Exhaust Cleaning Fleet
           </span>
         </div>
 
         {/* Main Headline */}
-        <h1 className="hero-headline text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold tracking-tight text-white leading-[1.08] max-w-5xl mb-6">
-          Precision. Technology. <br className="hidden sm:inline" />
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl xl:text-8xl font-display font-extrabold tracking-tight text-white leading-[1.05] max-w-6xl mb-6 drop-shadow-2xl">
+          Precision. Technology. <br />
           <span className="text-gold-gradient">Absolute Compliance.</span>
         </h1>
 
         {/* Subline */}
-        <p className="hero-subline text-lg sm:text-xl text-slate-300 max-w-3xl font-light leading-relaxed mb-10">
-          Advanced remote-inspection robotics, micron-grade grease measurement, and high-pressure thermal decontamination for commercial kitchen exhaust systems.
+        <p className="text-base sm:text-xl text-slate-200 max-w-3xl font-normal leading-relaxed mb-10 drop-shadow-md">
+          Scroll down to drive our robotic crawler through the kitchen exhaust system — extracting grease down to bare metal with 4K camera evidence.
         </p>
 
-        {/* CTA Hub */}
-        <div className="hero-cta flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-14">
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto">
           <motion.a
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(212,175,55,0.4)" }}
+            whileTap={{ scale: 0.96 }}
             href="#quote"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-md text-sm font-mono uppercase tracking-wider font-bold bg-gold-gradient text-brand-obsidian shadow-xl shadow-brand-gold/25 hover:shadow-brand-gold/40 transition-all duration-300"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-9 py-4 rounded-lg text-sm font-mono uppercase tracking-wider font-bold bg-gold-gradient text-brand-obsidian shadow-2xl transition-all"
           >
             <span>Request Facility Quote</span>
             <ArrowRight className="w-4 h-4 ml-2" />
           </motion.a>
           <motion.a
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.96 }}
             href="#technology"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 rounded-md text-sm font-mono uppercase tracking-wider font-semibold border border-brand-border/60 hover:border-brand-gold text-slate-200 hover:text-white bg-brand-navy/60 hover:bg-brand-navy-light/60 backdrop-blur-md transition-all duration-300"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-lg text-sm font-mono uppercase tracking-wider font-semibold border border-brand-gold/60 text-white bg-black/60 backdrop-blur-md hover:bg-brand-gold/20 transition-all"
           >
             <Scan className="w-4 h-4 mr-2 text-brand-gold" />
             <span>See The Technology</span>
           </motion.a>
         </div>
+      </div>
 
-        {/* Signature Hero Video Viewport with Live HUD */}
-        <div className="w-full max-w-5xl mx-auto relative perspective-1000 hero-hud-frame">
-          <div ref={frameRef} className="relative rounded-2xl overflow-hidden border-2 border-brand-gold/30 bg-brand-obsidian shadow-2xl shadow-black/80 transition-all">
-            
-            {/* Top Video HUD Bar */}
-            <div className="absolute top-0 inset-x-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-20 flex justify-between items-center text-xs font-mono text-brand-gold-light/90">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>ROBOTIC CAM_01 // LIVE DUCT SCANNER</span>
-              </div>
-              <div className="flex items-center gap-4 text-slate-300">
-                <span className="hidden sm:inline">THERMAL STEAM: 140°C</span>
-                <button 
-                  onClick={togglePlay}
-                  className="bg-black/60 hover:bg-brand-gold hover:text-brand-obsidian border border-brand-gold/40 px-2.5 py-1 rounded text-[10px] uppercase font-bold flex items-center gap-1 transition-colors"
-                >
-                  {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                  <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Video Canvas Container */}
-            <div className="relative w-full aspect-video sm:h-[500px] bg-slate-950 flex items-center justify-center overflow-hidden">
-              <video
-                ref={videoRef}
-                src="/videos/hero-robot-clean.mp4"
-                poster="/images/hero-poster.jpg"
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="w-full h-full object-cover opacity-90 scale-105"
-              />
-
-              {/* Blueprint Target Reticle */}
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="w-52 h-52 border border-brand-gold/30 rounded-full flex items-center justify-center relative">
-                  <div className="absolute w-full h-[1px] bg-brand-gold/25"></div>
-                  <div className="absolute h-full w-[1px] bg-brand-gold/25"></div>
-                  <div className="w-28 h-28 border border-dashed border-brand-gold/50 rounded-full animate-spin" style={{ animationDuration: '22s' }}></div>
-                  <div className="w-3.5 h-3.5 bg-brand-gold rounded-full shadow-[0_0_10px_#D4AF37]"></div>
-                </div>
-              </div>
-
-              {/* Bottom Video HUD Info Bar */}
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 sm:p-6 z-20 flex flex-wrap justify-between items-end gap-4 pointer-events-none">
-                <div className="text-left">
-                  <p className="text-[11px] font-mono text-brand-gold uppercase tracking-widest flex items-center gap-1.5">
-                    <RefreshCw className="w-3 h-3 animate-spin" /> Live Automated Crawl
-                  </p>
-                  <h4 className="text-base sm:text-lg font-display font-bold text-white">Continuous Duct Scour: 45m Range</h4>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="bg-black/70 border border-brand-gold/30 px-3 py-1.5 rounded font-mono text-xs text-brand-gold flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-brand-gold" />
-                    <span>Zero Confined Space Risk</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Technical Corner Brackets */}
-            <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-brand-gold z-30 pointer-events-none"></div>
-            <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-brand-gold z-30 pointer-events-none"></div>
-            <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-brand-gold z-30 pointer-events-none"></div>
-            <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-brand-gold z-30 pointer-events-none"></div>
+      {/* 4. MID-SCROLL DUCT TELEMETRY HUD (Appears during the video scrub) */}
+      <div
+        ref={hudMetricsRef}
+        className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none opacity-0"
+      >
+        <div className="gold-glass-card rounded-2xl p-8 max-w-2xl border-2 border-brand-gold/60 shadow-2xl shadow-brand-gold/20 text-center backdrop-blur-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-brand-gold/20 text-brand-gold font-mono text-xs font-bold mb-4 uppercase">
+            <CheckCircle2 className="w-4 h-4" /> Live Decontamination in Progress
           </div>
-
-          {/* Metric Badges */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <div className="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
-              <span className="text-[10px] font-mono text-brand-steel uppercase block">Duct Reach</span>
-              <span className="text-lg font-bold font-mono text-brand-gold-light">45m Continuous</span>
+          <h2 className="text-3xl sm:text-4xl font-display font-extrabold text-white mb-3">
+            Scouring 100% of Internal Ducting
+          </h2>
+          <p className="text-sm sm:text-base text-slate-300 font-sans leading-relaxed mb-6">
+            Unlike human cleaners who can only reach 1 metre from access panels, Grade X robotic crawlers liquidate hardened grease across the entire length of vertical risers and blind turns.
+          </p>
+          <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-4 text-left font-mono">
+            <div>
+              <span className="text-[10px] text-brand-steel uppercase block">Pre-Clean Fuel</span>
+              <span className="text-red-400 font-bold text-base">2,400 μm</span>
             </div>
-            <div className="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
-              <span className="text-[10px] font-mono text-brand-steel uppercase block">Grease Tolerance</span>
-              <span className="text-lg font-bold font-mono text-brand-gold-light">&lt; 50 Microns</span>
+            <div>
+              <span className="text-[10px] text-brand-steel uppercase block">Post-Clean Target</span>
+              <span className="text-emerald-400 font-bold text-base">&lt; 20 μm</span>
             </div>
-            <div className="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
-              <span className="text-[10px] font-mono text-brand-steel uppercase block">Resolution</span>
-              <span className="text-lg font-bold font-mono text-brand-gold-light">4K Ultra-HD Optic</span>
-            </div>
-            <div className="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
-              <span className="text-[10px] font-mono text-brand-steel uppercase block">Safety Protocol</span>
-              <span className="text-lg font-bold font-mono text-brand-gold-light">100% Remote WHS</span>
+            <div>
+              <span className="text-[10px] text-brand-steel uppercase block">Safety Standard</span>
+              <span className="text-brand-gold font-bold text-base">AS 1851-2012</span>
             </div>
           </div>
         </div>
-
       </div>
+
+      {/* 5. BOTTOM SCROLL-DRIVE INSTRUCTION BAR */}
+      <div className="absolute bottom-6 inset-x-0 z-20 px-6 sm:px-12 flex flex-col items-center pointer-events-none">
+        <div className="flex items-center gap-2 text-xs font-mono text-brand-gold uppercase tracking-widest animate-bounce mb-2">
+          <span>Scroll down to navigate duct</span>
+          <ChevronDown className="w-4 h-4" />
+        </div>
+        {/* Full-width interactive scrubbing progress bar */}
+        <div className="w-full max-w-xl h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+          <div
+            ref={progressBarRef}
+            className="h-full bg-gold-gradient shadow-[0_0_12px_#D4AF37] transition-all"
+            style={{ width: '0%' }}
+          />
+        </div>
+      </div>
+
     </section>
   );
 }
