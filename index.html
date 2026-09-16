@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grade X Commercial Solutions | WA's Premier Robotic Kitchen Exhaust Cleaning</title>
+  <meta name="description" content="Grade X operates Western Australia's only robotic kitchen exhaust cleaning technology. Precision duct inspection, grease thickness measurement, and verified fire compliance reporting." />
+
+  <!-- Fonts: Syne for futuristic luxury headers, Plus Jakarta Sans for ultra-clean UI, JetBrains Mono for telemetry -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Syne:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              obsidian: '#050B14',
+              navy: '#0B1528',
+              'navy-surface': '#101E38',
+              'navy-light': '#182C52',
+              gold: '#D4AF37',
+              'gold-light': '#F3E5AB',
+              'gold-metallic': '#C5A059',
+              'gold-subtle': 'rgba(212, 175, 55, 0.15)',
+              silver: '#E2E8F0',
+              steel: '#94A3B8',
+              border: 'rgba(212, 175, 55, 0.22)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Syne"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          backgroundImage: {
+            'gold-gradient': 'linear-gradient(135deg, #FFF1D0 0%, #D4AF37 50%, #AA820A 100%)',
+            'gold-gradient-hover': 'linear-gradient(135deg, #FFFFFF 0%, #E5C358 50%, #B88E12 100%)',
+            'navy-radial': 'radial-gradient(circle at 50% 0%, #152747 0%, #08101E 70%, #03070D 100%)',
+            'metallic-card': 'linear-gradient(145deg, rgba(16,30,56,0.7) 0%, rgba(11,21,40,0.85) 100%)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --gold-primary: #D4AF37;
+      --gold-accent: #F3E5AB;
+      --bg-dark: #050B14;
+    }
+
+    body {
+      background-color: #050B14;
+      color: #E2E8F0;
+      overflow-x: hidden;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    }
+
+    .blueprint-grid {
+      background-size: 50px 50px;
+      background-image: 
+        linear-gradient(to right, rgba(212, 175, 55, 0.035) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(212, 175, 55, 0.035) 1px, transparent 1px);
+    }
+
+    .blueprint-grid-dense {
+      background-size: 20px 20px;
+      background-image: 
+        linear-gradient(to right, rgba(212, 175, 55, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(212, 175, 55, 0.04) 1px, transparent 1px);
+    }
+
+    .text-gold-gradient {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F5E6BE 25%, #D4AF37 60%, #9B7811 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gold-glass-card {
+      background: linear-gradient(145deg, rgba(16, 30, 56, 0.6) 0%, rgba(9, 18, 35, 0.85) 100%);
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .gold-glass-card:hover {
+      border-color: rgba(212, 175, 55, 0.45);
+      box-shadow: 0 15px 40px -10px rgba(212, 175, 55, 0.12), inset 0 1px 1px rgba(212, 175, 55, 0.25);
+      transform: translateY(-3px);
+    }
+
+    .comparison-container {
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    .comparison-after {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    @keyframes pulse-gold {
+      0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+    }
+    .status-pulse {
+      animation: pulse-gold 2.2s infinite;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050B14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #182C52;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #D4AF37;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-delay: -1ms !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        background-attachment: initial !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0s !important;
+        transition-delay: 0s !important;
+      }
+    }
+  </style>
+</head>
+<body class="selection:bg-brand-gold/30 selection:text-brand-gold-light blueprint-grid relative">
+
+  <!-- TOP COMPLIANCE & STATUS BAR -->
+  <header class="w-full bg-[#03070E]/90 border-b border-brand-border/40 backdrop-blur-md sticky top-0 z-50 transition-all duration-300" id="mainHeader">
+    <div class="border-b border-white/5 py-1.5 px-4 sm:px-8 text-xs font-mono text-brand-steel flex flex-wrap justify-between items-center gap-2">
+      <div class="flex items-center space-x-4">
+        <span class="inline-flex items-center text-brand-gold-light gap-1.5 font-semibold">
+          <span class="w-2 h-2 rounded-full bg-brand-gold status-pulse"></span>
+          WA DISPATCH ACTIVE: PERTH METRO & REGIONAL
+        </span>
+        <span class="hidden md:inline text-white/30">|</span>
+        <span class="hidden md:inline">ABN: 45 684 073 345</span>
+      </div>
+      <div class="flex items-center space-x-6 text-brand-silver">
+        <a href="tel:0430360162" class="hover:text-brand-gold flex items-center gap-1.5 transition-colors">
+          <i data-lucide="phone-call" class="w-3.5 h-3.5 text-brand-gold"></i>
+          <span>0430 360 162</span>
+        </a>
+        <a href="mailto:gradex.perth@gmail.com" class="hidden sm:flex items-center gap-1.5 hover:text-brand-gold transition-colors">
+          <i data-lucide="mail" class="w-3.5 h-3.5 text-brand-gold"></i>
+          <span>gradex.perth@gmail.com</span>
+        </a>
+        <span class="bg-brand-gold/10 border border-brand-gold/30 text-brand-gold-light px-2 py-0.5 rounded text-[10px] font-semibold tracking-wide uppercase">
+          AS 1851-2012 Certified
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-navy-light to-brand-obsidian border border-brand-gold/40 flex items-center justify-center p-2 relative shadow-lg shadow-black/40 group-hover:border-brand-gold transition-all duration-300">
+          <svg viewBox="0 0 40 40" class="w-full h-full" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 8L32 32M32 8L8 32" stroke="#D4AF37" stroke-width="4.5" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="4" fill="#FFFFFF" />
+            <circle cx="20" cy="20" r="8" stroke="#D4AF37" stroke-width="1.5" stroke-dasharray="2 2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="font-display font-extrabold text-xl tracking-wider text-white">GRADE</span>
+            <span class="font-display font-extrabold text-xl tracking-wider text-brand-gold">X</span>
+          </div>
+          <p class="text-[9px] font-mono uppercase tracking-[0.22em] text-brand-steel -mt-1">Commercial Solutions</p>
+        </div>
+      </a>
+
+      <div class="hidden lg:flex items-center space-x-8 text-sm font-medium text-slate-300">
+        <a href="#technology" class="hover:text-brand-gold transition-colors duration-200 flex items-center gap-1">
+          <span class="text-brand-gold text-xs font-mono">01.</span> Technology
+        </a>
+        <a href="#methodology" class="hover:text-brand-gold transition-colors duration-200 flex items-center gap-1">
+          <span class="text-brand-gold text-xs font-mono">02.</span> 8-Step Methodology
+        </a>
+        <a href="#evidence" class="hover:text-brand-gold transition-colors duration-200 flex items-center gap-1">
+          <span class="text-brand-gold text-xs font-mono">03.</span> Digital Evidence
+        </a>
+        <a href="#services" class="hover:text-brand-gold transition-colors duration-200 flex items-center gap-1">
+          <span class="text-brand-gold text-xs font-mono">04.</span> Services
+        </a>
+        <a href="#compliance" class="hover:text-brand-gold transition-colors duration-200 flex items-center gap-1">
+          <span class="text-brand-gold text-xs font-mono">05.</span> Compliance & WHS
+        </a>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="#quote" class="hidden sm:inline-flex items-center justify-center px-5 py-2.5 rounded-md text-xs font-mono uppercase tracking-widest font-bold bg-gold-gradient text-brand-obsidian hover:bg-gold-gradient-hover shadow-lg shadow-brand-gold/20 hover:shadow-brand-gold/40 transition-all duration-300 transform active:scale-95">
+          Request a Quote
+        </a>
+        <button id="mobileMenuBtn" aria-label="Toggle Navigation Menu" class="lg:hidden p-2 rounded-lg border border-brand-border text-brand-gold hover:bg-brand-navy-light">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileMenu" class="hidden lg:hidden border-b border-brand-border/40 bg-brand-navy/95 backdrop-blur-xl px-6 py-6 space-y-4 font-mono text-sm">
+      <a href="#technology" class="block py-2 text-slate-200 hover:text-brand-gold flex items-center gap-2">
+        <span class="text-brand-gold">01.</span> Robotic Technology
+      </a>
+      <a href="#methodology" class="block py-2 text-slate-200 hover:text-brand-gold flex items-center gap-2">
+        <span class="text-brand-gold">02.</span> 8-Step Process
+      </a>
+      <a href="#evidence" class="block py-2 text-slate-200 hover:text-brand-gold flex items-center gap-2">
+        <span class="text-brand-gold">03.</span> Evidence & Reporting
+      </a>
+      <a href="#services" class="block py-2 text-slate-200 hover:text-brand-gold flex items-center gap-2">
+        <span class="text-brand-gold">04.</span> Commercial Services
+      </a>
+      <a href="#compliance" class="block py-2 text-slate-200 hover:text-brand-gold flex items-center gap-2">
+        <span class="text-brand-gold">05.</span> Compliance & Insurance
+      </a>
+      <div class="pt-4 border-t border-white/10 flex flex-col gap-3">
+        <a href="#quote" class="w-full text-center py-3 rounded bg-gold-gradient text-brand-obsidian font-bold uppercase tracking-wider text-xs">
+          Request Immediate Quote
+        </a>
+        <a href="tel:0430360162" class="w-full text-center py-2.5 rounded border border-brand-gold/40 text-brand-gold font-mono text-xs flex items-center justify-center gap-2">
+          <i data-lucide="phone" class="w-4 h-4"></i> Call Emergency 24/7
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================== -->
+  <!-- HERO SECTION WITH GSAP PINNING & VIDEO ZOOM -->
+  <!-- ========================================== -->
+  <section class="relative min-h-[90vh] lg:min-h-screen flex items-center justify-center pt-8 pb-20 overflow-hidden" id="heroSection">
+    
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-brand-navy-light/40 rounded-full blur-[140px]"></div>
+      <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[450px] h-[300px] bg-brand-gold/10 rounded-full blur-[100px]"></div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 w-full relative z-10 flex flex-col items-center text-center">
+      
+      <div class="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-brand-gold/40 bg-brand-navy/80 backdrop-blur-md mb-8 shadow-xl shadow-black/50">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-gold opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-gold"></span>
+        </span>
+        <span class="text-xs font-mono uppercase tracking-widest text-brand-gold-light font-semibold">
+          Western Australia's Sole Robotic Exhaust Cleaning Fleet
+        </span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold tracking-tight text-white leading-[1.08] max-w-5xl mb-6">
+        Precision. Technology. <br class="hidden sm:inline"/>
+        <span class="text-gold-gradient">Absolute Compliance.</span>
+      </h1>
+
+      <p class="text-lg sm:text-xl text-slate-300 max-w-3xl font-light leading-relaxed mb-10">
+        Advanced remote-inspection robotics, micron-grade grease measurement, and high-pressure thermal decontamination for commercial kitchen exhaust systems.
+      </p>
+
+      <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-16">
+        <a href="#quote" class="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-md text-sm font-mono uppercase tracking-wider font-bold bg-gold-gradient text-brand-obsidian hover:bg-gold-gradient-hover shadow-xl shadow-brand-gold/25 hover:shadow-brand-gold/40 transition-all duration-300 transform hover:-translate-y-0.5">
+          <span>Request Facility Quote</span>
+          <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+        </a>
+        <a href="#technology" class="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 rounded-md text-sm font-mono uppercase tracking-wider font-semibold border border-brand-border/60 hover:border-brand-gold text-slate-200 hover:text-white bg-brand-navy/60 hover:bg-brand-navy-light/60 backdrop-blur-md transition-all duration-300">
+          <i data-lucide="scan" class="w-4 h-4 mr-2 text-brand-gold"></i>
+          <span>See The Technology</span>
+        </a>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- SIGNATURE SCROLL-DRIVEN VIDEO VIEWPORT     -->
+      <!-- ========================================== -->
+      <div class="w-full max-w-5xl mx-auto relative perspective-1000" id="heroVideoWrapper">
+        <div id="heroVideoFrame" class="relative rounded-2xl overflow-hidden border-2 border-brand-gold/30 bg-brand-obsidian shadow-2xl shadow-black/80 transition-all duration-500">
+          
+          <div class="absolute top-0 inset-x-0 bg-gradient-to-b from-black/80 to-transparent p-4 z-20 flex justify-between items-center text-xs font-mono text-brand-gold-light/90 pointer-events-none">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>ROBOTIC CAM_01 // LIVE FEED 4K</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-4 text-slate-400">
+              <span>DUCT SECTION: WA-MTR-08</span>
+              <span>THERMAL STEAM: 140°C</span>
+              <span class="text-brand-gold">CALIBRATED</span>
+            </div>
+          </div>
+
+          <div class="relative w-full aspect-video sm:h-[480px] bg-slate-950 flex items-center justify-center overflow-hidden">
+            <video 
+              id="roboticDuctVideo"
+              class="w-full h-full object-cover opacity-85 scale-105"
+              autoplay 
+              muted 
+              loop 
+              playsinline
+              poster="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1600&q=80">
+              <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-robot-arm-in-a-laboratory-42777-large.mp4" type="video/mp4">
+              Your browser does not support HTML5 video.
+            </video>
+
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div class="w-48 h-48 border border-brand-gold/30 rounded-full flex items-center justify-center relative">
+                <div class="absolute w-full h-[1px] bg-brand-gold/20"></div>
+                <div class="absolute h-full w-[1px] bg-brand-gold/20"></div>
+                <div class="w-24 h-24 border border-dashed border-brand-gold/50 rounded-full animate-spin" style="animation-duration: 20s;"></div>
+                <div class="w-3 h-3 bg-brand-gold/80 rounded-full"></div>
+              </div>
+            </div>
+
+            <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 sm:p-6 z-20 flex flex-wrap justify-between items-end gap-4 pointer-events-none">
+              <div class="text-left">
+                <p class="text-[11px] font-mono text-brand-gold uppercase tracking-widest">Inspection & Scrape Unit</p>
+                <h4 class="text-base sm:text-lg font-display font-bold text-white">Continuous Duct Penetration: Up to 45 Metres</h4>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="bg-black/60 border border-brand-gold/30 px-3 py-1.5 rounded font-mono text-xs text-brand-gold flex items-center gap-2">
+                  <i data-lucide="shield-check" class="w-4 h-4"></i>
+                  <span>Zero Confined Space Hazard</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-brand-gold z-30 pointer-events-none"></div>
+          <div class="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-brand-gold z-30 pointer-events-none"></div>
+          <div class="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-brand-gold z-30 pointer-events-none"></div>
+          <div class="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-brand-gold z-30 pointer-events-none"></div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
+          <div class="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
+            <span class="text-[10px] font-mono text-brand-steel uppercase block">Duct Reach</span>
+            <span class="text-lg font-bold font-mono text-brand-gold-light">45m Continuous</span>
+          </div>
+          <div class="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
+            <span class="text-[10px] font-mono text-brand-steel uppercase block">Grease Tolerance</span>
+            <span class="text-lg font-bold font-mono text-brand-gold-light">&lt; 50 Microns</span>
+          </div>
+          <div class="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
+            <span class="text-[10px] font-mono text-brand-steel uppercase block">Resolution</span>
+            <span class="text-lg font-bold font-mono text-brand-gold-light">4K Ultra-HD Optic</span>
+          </div>
+          <div class="bg-brand-navy/60 border border-brand-border/40 rounded-lg p-3 text-left">
+            <span class="text-[10px] font-mono text-brand-steel uppercase block">Safety Protocol</span>
+            <span class="text-lg font-bold font-mono text-brand-gold-light">100% Remote WHS</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- THE DIFFERENTIATOR STRIP & ANIMATED STATS   -->
+  <!-- ========================================== -->
+  <section class="py-20 border-y border-brand-border/30 bg-gradient-to-b from-[#081220] via-brand-navy to-[#050B14] relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-16">
+        <div class="lg:col-span-5 text-left">
+          <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center gap-2 mb-2">
+            <i data-lucide="cpu" class="w-4 h-4"></i> The Grade X Differentiator
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-white leading-tight">
+            Manual cleaning cannot reach where grease accumulates. <span class="text-brand-gold">Our robots do.</span>
+          </h2>
+        </div>
+        <div class="lg:col-span-7 text-slate-300 text-base sm:text-lg font-light leading-relaxed border-l-0 lg:border-l border-brand-border/40 lg:pl-8">
+          Traditional commercial cleaning relies on manual arm-reach from access panels — leaving up to 70% of internal horizontal ducting untouched. Grade X operates crawler robots equipped with high-pressure rotary thermal nozzles and 360° pan-tilt cameras, delivering 100% full-run extraction and unquestionable compliance certificates.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="statsGrid">
+        <div class="gold-glass-card rounded-xl p-6 relative overflow-hidden group">
+          <div class="text-brand-gold/10 group-hover:text-brand-gold/20 absolute -right-2 -bottom-2 transition-all duration-300">
+            <i data-lucide="clock" class="w-24 h-24"></i>
+          </div>
+          <span class="text-xs font-mono text-brand-steel uppercase tracking-wider block mb-2">Service Downtime</span>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl sm:text-5xl font-extrabold font-display text-white counter" data-target="50">0</span>
+            <span class="text-3xl font-display text-brand-gold font-bold">%</span>
+          </div>
+          <p class="text-xs text-slate-400 font-sans">Faster completion than manual labor with zero kitchen disruption.</p>
+        </div>
+
+        <div class="gold-glass-card rounded-xl p-6 relative overflow-hidden group">
+          <div class="text-brand-gold/10 group-hover:text-brand-gold/20 absolute -right-2 -bottom-2 transition-all duration-300">
+            <i data-lucide="file-check-2" class="w-24 h-24"></i>
+          </div>
+          <span class="text-xs font-mono text-brand-steel uppercase tracking-wider block mb-2">Compliance Turnaround</span>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl sm:text-5xl font-extrabold font-display text-white counter" data-target="24">0</span>
+            <span class="text-xl font-display text-brand-gold font-bold">HRS</span>
+          </div>
+          <p class="text-xs text-slate-400 font-sans">Comprehensive digital audit package delivered to your portal within 24h.</p>
+        </div>
+
+        <div class="gold-glass-card rounded-xl p-6 relative overflow-hidden group">
+          <div class="text-brand-gold/10 group-hover:text-brand-gold/20 absolute -right-2 -bottom-2 transition-all duration-300">
+            <i data-lucide="shield-alert" class="w-24 h-24"></i>
+          </div>
+          <span class="text-xs font-mono text-brand-steel uppercase tracking-wider block mb-2">Fire Risk Reduction</span>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl sm:text-5xl font-extrabold font-display text-white counter" data-target="99">0</span>
+            <span class="text-3xl font-display text-brand-gold font-bold">.8%</span>
+          </div>
+          <p class="text-xs text-slate-400 font-sans">Verified fuel load extraction across plenums, risers and fan housings.</p>
+        </div>
+
+        <div class="gold-glass-card rounded-xl p-6 relative overflow-hidden group">
+          <div class="text-brand-gold/10 group-hover:text-brand-gold/20 absolute -right-2 -bottom-2 transition-all duration-300">
+            <i data-lucide="award" class="w-24 h-24"></i>
+          </div>
+          <span class="text-xs font-mono text-brand-steel uppercase tracking-wider block mb-2">WA Venues Serviced</span>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl sm:text-5xl font-extrabold font-display text-white counter" data-target="350">0</span>
+            <span class="text-3xl font-display text-brand-gold font-bold">+</span>
+          </div>
+          <p class="text-xs text-slate-400 font-sans">Trusted by premier hospitality groups, QSR chains & mining hubs.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: WHY ROBOTIC BEATS MANUAL          -->
+  <!-- ========================================== -->
+  <section class="py-24 relative overflow-hidden" id="technology">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center justify-center gap-2 mb-3">
+          <i data-lucide="sparkles" class="w-4 h-4"></i> Engineering Superiority
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white">
+          Why Robotic Cleaning <span class="text-gold-gradient">Outperforms Manual</span>
+        </h2>
+        <p class="mt-4 text-slate-300 font-light text-base sm:text-lg">
+          Facility managers are legally liable for fire hazards under Australian Standards. Here is how automation removes human error and liability.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="gold-glass-card rounded-2xl p-8 flex flex-col justify-between relative group hover:border-brand-gold/60 transition-all duration-300">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-brand-gold/5 rounded-bl-full pointer-events-none"></div>
+          <div>
+            <div class="w-14 h-14 rounded-xl bg-brand-navy-light border border-brand-border/60 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i data-lucide="shield-check" class="w-7 h-7"></i>
+            </div>
+            <span class="text-xs font-mono text-brand-gold font-semibold uppercase tracking-wider">01 // Zero Harm WHS</span>
+            <h3 class="text-2xl font-display font-bold text-white mt-1 mb-4">Confined Space Safety</h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6">
+              Manual cleaning forces workers into hazardous, narrow, non-load-bearing ceiling ducts. Grade X deploys remote crawlers — eliminating high-risk confined space permits and catastrophic fall hazards completely.
+            </p>
+          </div>
+          <ul class="space-y-2.5 text-xs font-mono text-slate-400 border-t border-white/10 pt-4">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> No human entry into vertical risers</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Zero structural duct ceiling damage</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Fully compliant with Safe Work Australia</li>
+          </ul>
+        </div>
+
+        <div class="gold-glass-card rounded-2xl p-8 flex flex-col justify-between relative group hover:border-brand-gold/60 transition-all duration-300">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-brand-gold/5 rounded-bl-full pointer-events-none"></div>
+          <div>
+            <div class="w-14 h-14 rounded-xl bg-brand-navy-light border border-brand-border/60 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i data-lucide="gauge" class="w-7 h-7"></i>
+            </div>
+            <span class="text-xs font-mono text-brand-gold font-semibold uppercase tracking-wider">02 // 360° Mechanical Precision</span>
+            <h3 class="text-2xl font-display font-bold text-white mt-1 mb-4">Continuous Full-Run Extraction</h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6">
+              Manual scraping misses blind bends, damper valves, and mid-duct junctions. Our robotic units maintain constant 3,000 PSI thermal rotary scouring across 100% of the internal duct surface.
+            </p>
+          </div>
+          <ul class="space-y-2.5 text-xs font-mono text-slate-400 border-t border-white/10 pt-4">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> 140°C saturated dry steam jetting</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Carbonized grease liquidation</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Penetrates 45m from single access point</li>
+          </ul>
+        </div>
+
+        <div class="gold-glass-card rounded-2xl p-8 flex flex-col justify-between relative group hover:border-brand-gold/60 transition-all duration-300">
+          <div class="absolute top-0 right-0 w-24 h-24 bg-brand-gold/5 rounded-bl-full pointer-events-none"></div>
+          <div>
+            <div class="w-14 h-14 rounded-xl bg-brand-navy-light border border-brand-border/60 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform duration-300">
+              <i data-lucide="video" class="w-7 h-7"></i>
+            </div>
+            <span class="text-xs font-mono text-brand-gold font-semibold uppercase tracking-wider">03 // Empirical Verification</span>
+            <h3 class="text-2xl font-display font-bold text-white mt-1 mb-4">Live 4K Inspection & Microns</h3>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6">
+              Traditional contractors give you vague photos taken at access doors. Grade X provides time-stamped full-run HD video and calibrated magnetic DFT grease-depth metrics before and after the clean.
+            </p>
+          </div>
+          <ul class="space-y-2.5 text-xs font-mono text-slate-400 border-t border-white/10 pt-4">
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Objective grease depth measurement (μm)</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Uncut endoscopic video audit trail</li>
+            <li class="flex items-center gap-2"><i data-lucide="check" class="w-4 h-4 text-brand-gold"></i> Insurer & Department of Health approved</li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: OUR METHODOLOGY (8-STEP STEPPER)  -->
+  <!-- ========================================== -->
+  <section class="py-24 bg-brand-navy/60 border-y border-brand-border/30 relative" id="methodology">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div>
+          <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center gap-2 mb-3">
+            <i data-lucide="workflow" class="w-4 h-4"></i> Engineered Protocol
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white">
+            Our 8-Step <span class="text-gold-gradient">Methodology</span>
+          </h2>
+        </div>
+        <p class="text-slate-300 max-w-md font-light text-sm">
+          A systematic, certified workflow guaranteeing AS 1851-2012 compliance and full fire-risk insulation for facility stakeholders.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+        
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">01</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">PRE-AUDIT</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Robotic Video Inspection</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Crawler robot navigates the entire duct system, mapping geometry, bends, damper positions, and high-risk grease buildup zones.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="camera" class="w-3.5 h-3.5 text-brand-gold"></i> 4K Video Telemetry
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">02</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">METRICS</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Grease Depth Measurement</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Calibrated ultrasonic & wet film gauges record baseline grease layer thickness in microns (μm) across key fire danger points.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="gauge" class="w-3.5 h-3.5 text-brand-gold"></i> AS 1851 Fuel Baseline
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">03</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">ISOLATION</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Cleanroom Containment</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Kitchen cooktops, appliances, and preparation zones are hermetically sealed with heavy-duty poly-sheeting and negative-pressure extractors.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="shield" class="w-3.5 h-3.5 text-brand-gold"></i> Food-Grade Hygiene
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">04</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">THERMAL</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">High-Pressure Thermal Jetting</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              High-temp eco-safe degreasers softened by 140°C pressurized dry steam break the chemical bonds of hardened carbon deposits.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="flame" class="w-3.5 h-3.5 text-brand-gold"></i> 140°C Rotary Decon
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">05</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">SCOURING</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Robotic Brush & Extraction</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Bi-directional motorized steel and nylon head attachments scrape the internal duct walls to bare sheet metal with vacuum capture.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-brand-gold"></i> Bare-Metal Finish
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">06</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">AUDIT</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Final Optical Verification</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Secondary robotic run with high-lumen illumination to capture unbroken post-clean footage of every metre from hood to exhaust discharge.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-brand-gold"></i> Zero Shadow Zones
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">07</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-navy-light text-brand-gold-light border border-brand-border/40">QUANTIFY</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Post-Clean Gauge Verification</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Grease thickness is re-measured across identical coordinate points, mathematically proving reduction to below 50 microns (&lt;50μm).
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> 100% AS 1851 Compliance
+          </div>
+        </div>
+
+        <div class="methodology-card gold-glass-card rounded-xl p-6 relative border-l-2 border-l-brand-gold flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-2xl font-display font-black text-brand-gold font-mono">08</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-brand-gold/20 text-brand-gold font-bold border border-brand-gold/40">DELIVERY</span>
+            </div>
+            <h3 class="text-lg font-bold text-white font-display mb-2">Digital Certificate & Portal</h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Issuance of your legal Certificate of Compliance, raw video evidence files, and quantitative report for insurance underwriters.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
+            <i data-lucide="file-text" class="w-3.5 h-3.5 text-brand-gold"></i> Insurer-Ready PDF + MP4
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: DIGITAL EVIDENCE & BEFORE/AFTER   -->
+  <!-- ========================================== -->
+  <section class="py-24 relative overflow-hidden" id="evidence">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center justify-center gap-2 mb-3">
+          <i data-lucide="binary" class="w-4 h-4"></i> Empirical Fire Safety
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white">
+          Undeniable Proof of <span class="text-gold-gradient">Compliance</span>
+        </h2>
+        <p class="mt-4 text-slate-300 font-light text-base sm:text-lg">
+          In an insurance audit or post-fire investigation, opinions mean nothing. Grade X delivers quantitative, calibrated proof of compliance.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        <div class="lg:col-span-7 gold-glass-card rounded-2xl p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4 text-xs font-mono text-brand-steel">
+            <span class="flex items-center gap-2">
+              <i data-lucide="sliders-horizontal" class="w-4 h-4 text-brand-gold"></i>
+              DRAG SLIDER TO VERIFY DECONTAMINATION
+            </span>
+            <span class="text-brand-gold-light bg-brand-navy-light px-2 py-0.5 rounded border border-brand-border/30">
+              DUCT SECTION 14B // WA RESORT
+            </span>
+          </div>
+
+          <div class="comparison-container rounded-xl overflow-hidden aspect-[16/10] sm:h-[400px] border border-brand-border/40 relative cursor-ew-resize select-none" id="comparisonSlider">
+            
+            <div class="absolute inset-0 w-full h-full bg-slate-900">
+              <img 
+                src="https://images.unsplash.com/photo-1590496793929-36417d3117de?auto=format&fit=crop&w=1200&q=80" 
+                alt="Dangerous grease buildup inside kitchen exhaust duct before Grade X robotic cleaning" 
+                class="w-full h-full object-cover filter contrast-125 brightness-75 sepia-[0.35]"
+              />
+              <div class="absolute top-4 left-4 bg-red-950/80 border border-red-500/50 text-red-200 text-xs font-mono px-3 py-1.5 rounded backdrop-blur-md">
+                <span>BEFORE: 2,400 μm FAT/GREASE (CRITICAL RISK)</span>
+              </div>
+            </div>
+
+            <div class="comparison-after" id="sliderAfterClip" style="width: 50%;">
+              <div class="absolute inset-0 w-full h-full bg-slate-900" style="width: 100vw; max-width: 700px;">
+                <img 
+                  src="https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?auto=format&fit=crop&w=1200&q=80" 
+                  alt="Spotless metallic bare-metal kitchen exhaust duct after Grade X robotic decontamination" 
+                  class="w-full h-full object-cover filter brightness-110 contrast-105"
+                />
+                <div class="absolute top-4 right-4 bg-emerald-950/80 border border-emerald-500/50 text-emerald-200 text-xs font-mono px-3 py-1.5 rounded backdrop-blur-md">
+                  <span>AFTER: &lt; 20 μm BARE METAL (AS 1851 CERTIFIED)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="absolute top-0 bottom-0 w-1 bg-brand-gold shadow-[0_0_12px_#D4AF37] z-30 pointer-events-none" id="sliderDivider" style="left: 50%;">
+              <div class="absolute top-1/2 -translate-y-1/2 -left-4 w-9 h-9 rounded-full bg-brand-navy border-2 border-brand-gold text-brand-gold flex items-center justify-center shadow-lg">
+                <i data-lucide="chevrons-left-right" class="w-4 h-4"></i>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="flex justify-between items-center mt-3 text-[11px] font-mono text-slate-400">
+            <span>◄ Heavy Solidified Grease (Fire Hazard)</span>
+            <span class="text-brand-gold">Bare Stainless Steel (Insured) ►</span>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 space-y-4">
+          
+          <div class="gold-glass-card rounded-xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-brand-navy-light border border-brand-border/60 flex-shrink-0 flex items-center justify-center text-brand-gold">
+              <i data-lucide="ruler" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-base font-display font-bold text-white mb-1">1. Micron-Level Grease Thickness</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                We measure grease before and after in microns using calibrated magnetic gauges according to AS 1851-2012 / NFPA 96 standards.
+              </p>
+            </div>
+          </div>
+
+          <div class="gold-glass-card rounded-xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-brand-navy-light border border-brand-border/60 flex-shrink-0 flex items-center justify-center text-brand-gold">
+              <i data-lucide="video" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-base font-display font-bold text-white mb-1">2. Unedited 4K Video Log</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Access full continuous endoscopic video footage of internal plenums, risers, and bends that human inspectors can never see.
+              </p>
+            </div>
+          </div>
+
+          <div class="gold-glass-card rounded-xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 rounded-lg bg-brand-navy-light border border-brand-border/60 flex-shrink-0 flex items-center justify-center text-brand-gold">
+              <i data-lucide="award" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h4 class="text-base font-display font-bold text-white mb-1">3. Insurer-Accepted Compliance Pack</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                Includes Certificate of Cleanliness, risk assessment, photographic audit log, and sign-off recognized by all Australian insurers.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-r from-brand-navy-light to-brand-navy border border-brand-gold/40 rounded-xl p-5 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono text-brand-gold uppercase tracking-widest font-semibold block">Sample Compliance Pack</span>
+              <p class="text-sm font-bold text-white">Grade X Sample Audit Dossier (PDF)</p>
+            </div>
+            <a href="#quote" class="px-4 py-2 bg-brand-navy border border-brand-gold/50 text-brand-gold-light hover:bg-brand-gold hover:text-brand-obsidian rounded font-mono text-xs font-semibold transition-all duration-200">
+              View Sample
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: SERVICES OVERVIEW (4 CATEGORIES)   -->
+  <!-- ========================================== -->
+  <section class="py-24 bg-[#070E1A] border-y border-brand-border/30 relative" id="services">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+        <div>
+          <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center gap-2 mb-3">
+            <i data-lucide="layers" class="w-4 h-4"></i> Complete Commercial Solutions
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white">
+            Specialised Commercial <span class="text-gold-gradient">Capabilities</span>
+          </h2>
+        </div>
+        <p class="text-slate-300 max-w-md font-light text-sm">
+          While robotic kitchen exhaust cleaning is our flagship core capability, Grade X provides end-to-end commercial property decontamination across Western Australia.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <div class="gold-glass-card rounded-2xl p-7 flex flex-col justify-between relative group border-t-4 border-t-brand-gold">
+          <div class="absolute top-3 right-3">
+            <span class="bg-brand-gold text-brand-obsidian text-[9px] font-mono font-extrabold uppercase px-2 py-0.5 rounded shadow">FLAGSHIP TECH</span>
+          </div>
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-brand-navy-light border border-brand-gold/40 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform">
+              <i data-lucide="bot" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-display font-bold text-white mb-3">Kitchen Exhaust & Duct Hygiene</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+              Robotic duct decontamination, exhaust hood degreasing, fan housing extraction, electrostatic precipitator (ESP) cleaning & AS 1851 certification.
+            </p>
+          </div>
+          <div class="space-y-2 border-t border-white/10 pt-4 text-xs font-mono text-slate-300">
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Full-length robotic crawling</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Filter exchange program</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Fire damper inspection</div>
+          </div>
+        </div>
+
+        <div class="gold-glass-card rounded-2xl p-7 flex flex-col justify-between relative group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-brand-navy-light border border-brand-border/60 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform">
+              <i data-lucide="chef-hat" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-display font-bold text-white mb-3">Commercial Kitchen Deep Cleaning</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+              Full culinary line sanitization. High-temperature steam strip-down of fryers, combi-ovens, ranges, cool rooms, grease traps, and food-prep surfaces.
+            </p>
+          </div>
+          <div class="space-y-2 border-t border-white/10 pt-4 text-xs font-mono text-slate-300">
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Non-toxic food-safe chemicals</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Coolroom mould remediation</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Health dept. audit readiness</div>
+          </div>
+        </div>
+
+        <div class="gold-glass-card rounded-2xl p-7 flex flex-col justify-between relative group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-brand-navy-light border border-brand-border/60 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform">
+              <i data-lucide="building" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-display font-bold text-white mb-3">Lobby & Front-of-House</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+              High-traffic commercial floor scrubbing, terrazzo and marble polishing, architectural glass sanitization, and premium facility presentation.
+            </p>
+          </div>
+          <div class="space-y-2 border-t border-white/10 pt-4 text-xs font-mono text-slate-300">
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Heavy machine rotary scrub</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> High-level atrium dusting</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Slip-coefficient compliance</div>
+          </div>
+        </div>
+
+        <div class="gold-glass-card rounded-2xl p-7 flex flex-col justify-between relative group">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-brand-navy-light border border-brand-border/60 flex items-center justify-center text-brand-gold mb-6 group-hover:scale-110 transition-transform">
+              <i data-lucide="sparkles" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-xl font-display font-bold text-white mb-3">Exterior & Building Maintenance</h3>
+            <p class="text-xs text-slate-300 leading-relaxed mb-6">
+              Industrial hot-water pressure washing, bin coral degreasing, loading dock washdowns, carpark oil extraction, and facade maintenance.
+            </p>
+          </div>
+          <div class="space-y-2 border-t border-white/10 pt-4 text-xs font-mono text-slate-300">
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> 4,000 PSI hot wash units</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Wastewater recapture protocols</div>
+            <div class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-brand-gold"></i> Commercial window cleaning</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: COMPLIANCE & TRUST STRIP          -->
+  <!-- ========================================== -->
+  <section class="py-20 bg-brand-obsidian relative" id="compliance">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center justify-center gap-2 mb-2">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Corporate Risk Mitigation
+        </span>
+        <h2 class="text-2xl sm:text-4xl font-display font-extrabold text-white">
+          Accredited, Insured & <span class="text-brand-gold">Fully Compliant</span>
+        </h2>
+        <p class="text-slate-400 text-sm mt-2">
+          We protect facility managers, landlords, and franchise executives from regulatory fines and insurance repudiation.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="gold-glass-card rounded-xl p-6 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-brand-navy-light border border-brand-gold/30 flex items-center justify-center text-brand-gold mb-3">
+            <i data-lucide="badge-dollar-sign" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-white font-display mb-1">$20M Public Liability</h4>
+          <p class="text-[11px] font-mono text-slate-400">Comprehensive coverage across all commercial sites.</p>
+        </div>
+
+        <div class="gold-glass-card rounded-xl p-6 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-brand-navy-light border border-brand-gold/30 flex items-center justify-center text-brand-gold mb-3">
+            <i data-lucide="hard-hat" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-white font-display mb-1">Strict WHS Protocols</h4>
+          <p class="text-[11px] font-mono text-slate-400">SWMS, JSA documentation and zero-confined space risk.</p>
+        </div>
+
+        <div class="gold-glass-card rounded-xl p-6 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-brand-navy-light border border-brand-gold/30 flex items-center justify-center text-brand-gold mb-3">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-white font-display mb-1">AS 1851-2012 Standard</h4>
+          <p class="text-[11px] font-mono text-slate-400">Australian Standard routine service of fire protection systems.</p>
+        </div>
+
+        <div class="gold-glass-card rounded-xl p-6 text-center">
+          <div class="w-12 h-12 mx-auto rounded-full bg-brand-navy-light border border-brand-gold/30 flex items-center justify-center text-brand-gold mb-3">
+            <i data-lucide="heart-pulse" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-sm font-bold text-white font-display mb-1">Food-Safe Certified</h4>
+          <p class="text-[11px] font-mono text-slate-400">HACCP-aligned non-toxic biodegradables and containment.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: 24/7 EMERGENCY RESPONSE CALLOUT   -->
+  <!-- ========================================== -->
+  <section class="py-12 bg-gradient-to-r from-red-950/40 via-brand-navy-surface to-brand-obsidian border-y border-red-500/20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col lg:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-5 text-left">
+        <div class="w-14 h-14 rounded-xl bg-red-900/30 border border-red-500/40 flex items-center justify-center text-red-400 flex-shrink-0 animate-pulse">
+          <i data-lucide="flame" class="w-7 h-7"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-red-500/20 text-red-300 border border-red-500/30 font-bold uppercase">
+              Emergency Rapid Dispatch
+            </span>
+            <span class="text-xs font-mono text-slate-400">Perth Metro & Surrounds</span>
+          </div>
+          <h3 class="text-xl sm:text-2xl font-display font-bold text-white mt-1">
+            Council Notice, Fire Marshall Audit or Kitchen Flare-Up?
+          </h3>
+          <p class="text-xs sm:text-sm text-slate-300">
+            Emergency overnight and same-day robotic deployment to restore compliance without business shutdown.
+          </p>
+        </div>
+      </div>
+      <div class="flex-shrink-0">
+        <a href="tel:0430360162" class="inline-flex items-center gap-3 px-6 py-3.5 rounded-md bg-red-600 hover:bg-red-500 text-white font-mono font-bold text-sm tracking-wider shadow-lg shadow-red-900/40 transition-all duration-200">
+          <i data-lucide="phone-call" class="w-4 h-4"></i>
+          <span>CALL 0430 360 162 NOW</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- SECTION: REQUEST A QUOTE (FINAL CTA FORM)  -->
+  <!-- ========================================== -->
+  <section class="py-24 relative overflow-hidden bg-brand-navy" id="quote">
+    
+    <div class="absolute inset-0 blueprint-grid-dense pointer-events-none opacity-40"></div>
+    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-brand-gold/5 rounded-full blur-[150px] pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 relative z-10">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        <div class="lg:col-span-5 text-left">
+          <span class="text-xs font-mono text-brand-gold uppercase tracking-widest font-semibold flex items-center gap-2 mb-3">
+            <i data-lucide="send" class="w-4 h-4"></i> Rapid Facility Onboarding
+          </span>
+          <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white leading-tight">
+            Schedule Your <br/><span class="text-gold-gradient">Robotic Audit</span>
+          </h2>
+          <p class="mt-4 text-slate-300 font-light text-sm sm:text-base leading-relaxed">
+            Protect your commercial premises with Western Australia's only robotic exhaust cleaning fleet. Contact our engineering team for a customized site quote.
+          </p>
+
+          <div class="mt-8 space-y-4 font-mono text-xs text-slate-300">
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-brand-obsidian/60 border border-brand-border/30">
+              <i data-lucide="map-pin" class="w-5 h-5 text-brand-gold flex-shrink-0"></i>
+              <span>5 Elward Way, Balga WA 6061</span>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-brand-obsidian/60 border border-brand-border/30">
+              <i data-lucide="phone" class="w-5 h-5 text-brand-gold flex-shrink-0"></i>
+              <a href="tel:0430360162" class="hover:text-brand-gold transition-colors">0430 360 162 (Direct WA Line)</a>
+            </div>
+            <div class="flex items-center gap-3 p-3 rounded-lg bg-brand-obsidian/60 border border-brand-border/30">
+              <i data-lucide="mail" class="w-5 h-5 text-brand-gold flex-shrink-0"></i>
+              <a href="mailto:gradex.perth@gmail.com" class="hover:text-brand-gold transition-colors">gradex.perth@gmail.com</a>
+            </div>
+          </div>
+
+          <div class="mt-8 p-4 rounded-xl border border-brand-gold/30 bg-brand-gold/5 flex items-center gap-3">
+            <i data-lucide="shield-alert" class="w-6 h-6 text-brand-gold flex-shrink-0"></i>
+            <p class="text-xs font-sans text-slate-300">
+              <strong class="text-brand-gold-light">Insurance Guarantee:</strong> All audits guaranteed compliant with AS 1851-2012 Table 13.4.4.
+            </p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="gold-glass-card rounded-2xl p-6 sm:p-10 border border-brand-gold/30">
+            
+            <form id="quoteForm" onsubmit="event.preventDefault(); handleFormSubmit();" class="space-y-6">
+              
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label for="fullName" class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-2">
+                    Full Name <span class="text-brand-gold">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="fullName" 
+                    required 
+                    placeholder="e.g. Marcus Vance" 
+                    class="w-full bg-brand-obsidian/90 border border-brand-border/60 focus:border-brand-gold text-white text-sm rounded-lg px-4 py-3 outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label for="companyName" class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-2">
+                    Company / Venue Name <span class="text-brand-gold">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="companyName" 
+                    required 
+                    placeholder="e.g. Crown Perth / Franchise Hub" 
+                    class="w-full bg-brand-obsidian/90 border border-brand-border/60 focus:border-brand-gold text-white text-sm rounded-lg px-4 py-3 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label for="phone" class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-2">
+                    Phone Number <span class="text-brand-gold">*</span>
+                  </label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    required 
+                    placeholder="04XX XXX XXX" 
+                    class="w-full bg-brand-obsidian/90 border border-brand-border/60 focus:border-brand-gold text-white text-sm rounded-lg px-4 py-3 outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label for="email" class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-2">
+                    Corporate Email <span class="text-brand-gold">*</span>
+                  </label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    required 
+                    placeholder="manager@venue.com.au" 
+                    class="w-full bg-brand-obsidian/90 border border-brand-border/60 focus:border-brand-gold text-white text-sm rounded-lg px-4 py-3 outline-none transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label for="serviceType" class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-2">
+                  Primary Service Requirement <span class="text-brand-gold">*</span>
+                </label>
+                <select 
+                  id="serviceType" 
+                  required 
+                  class="w-full bg-brand-obsidian/90 border border-brand-border/60 focus:border-brand-gold text-white text-sm rounded-lg px-4 py-3 outline-none transition-colors"
+                >
+                  <option value="Robotic Kitchen Exhaust & Duct Cleaning">Robotic Kitchen Exhaust & Duct Cleaning (Flagship)</option>
+                  <option value="Complete Commercial Kitchen Sanitization">Complete Commercial Kitchen Strip-Down & Sanitization</option>
+                  <option value="Compliance Pre-Audit & Grease Thickness Gauge">Compliance Pre-Audit & Grease Thickness Gauge</option>
+                  <option value="Lobby, Floor Scrubbing & Front-of-House">Lobby, Floor Scrubbing & Front-of-House</option>
+                  <option value="Exterior Hot-Wash & Facility Maintenance">Exterior Hot-Wash & Facility Maintenance</option>
+                  <option value="Urgent 24/7 Emergency Response">Urgent 24/7 Emergency Response</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="siteNotes" class="block text-xs font-mono uppercase tracking-wider text-slate-300 mb-2">
+                  Site Details (Location, Duct Height, Canopy Count)
+                </label>
+                <textarea 
+                  id="siteNotes" 
+                  rows="3" 
+                  placeholder="e.g. 2 x 6-metre canopies, roof exhaust fan access, Perth CBD location..." 
+                  class="w-full bg-brand-obsidian/90 border border-brand-border/60 focus:border-brand-gold text-white text-sm rounded-lg px-4 py-3 outline-none transition-colors"
+                ></textarea>
+              </div>
+
+              <button 
+                type="submit" 
+                id="submitBtn" 
+                class="w-full py-4 rounded-md text-sm font-mono uppercase tracking-wider font-bold bg-gold-gradient text-brand-obsidian hover:bg-gold-gradient-hover shadow-xl shadow-brand-gold/30 hover:shadow-brand-gold/50 transition-all duration-300 transform active:scale-98 flex items-center justify-center gap-2"
+              >
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Submit For Priority Engineering Quote</span>
+              </button>
+
+              <div id="formSuccessMessage" class="hidden p-4 rounded-lg bg-emerald-950/80 border border-emerald-500/60 text-emerald-200 text-xs font-mono text-center">
+                ✓ Quote request received. Grade X technical dispatcher will contact you within 2 hours.
+              </div>
+
+            </form>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- FOOTER                                     -->
+  <!-- ========================================== -->
+  <footer class="bg-[#02050A] border-t border-brand-border/40 pt-16 pb-12 text-slate-400 font-sans text-xs relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+        
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded bg-brand-navy border border-brand-gold/40 flex items-center justify-center p-1.5">
+              <svg viewBox="0 0 40 40" class="w-full h-full" fill="none">
+                <path d="M8 8L32 32M32 8L8 32" stroke="#D4AF37" stroke-width="4.5" stroke-linecap="round"/>
+                <circle cx="20" cy="20" r="4" fill="#FFFFFF" />
+              </svg>
+            </div>
+            <span class="font-display font-extrabold text-lg text-white">GRADE <span class="text-brand-gold">X</span></span>
+          </div>
+          <p class="text-slate-400 max-w-sm text-xs leading-relaxed">
+            Grade X Commercial Solutions Pty Ltd is Western Australia's specialized commercial decontamination firm operating cutting-edge robotic exhaust cleaning and compliance certification.
+          </p>
+          <div class="font-mono text-[11px] text-slate-500 space-y-1">
+            <p>Grade X Commercial Solutions Pty Ltd</p>
+            <p>ABN: 45 684 073 345</p>
+            <p>5 Elward Way, Balga WA 6061</p>
+          </div>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-mono uppercase tracking-widest text-brand-gold font-bold mb-4">Navigation</h5>
+          <ul class="space-y-2.5">
+            <li><a href="#heroSection" class="hover:text-brand-gold transition-colors">Home</a></li>
+            <li><a href="#technology" class="hover:text-brand-gold transition-colors">Robotic Technology</a></li>
+            <li><a href="#methodology" class="hover:text-brand-gold transition-colors">8-Step Methodology</a></li>
+            <li><a href="#evidence" class="hover:text-brand-gold transition-colors">Digital Evidence</a></li>
+            <li><a href="#services" class="hover:text-brand-gold transition-colors">Commercial Services</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-mono uppercase tracking-widest text-brand-gold font-bold mb-4">Compliance</h5>
+          <ul class="space-y-2.5">
+            <li><a href="#compliance" class="hover:text-brand-gold transition-colors">AS 1851-2012 Compliance</a></li>
+            <li><a href="#compliance" class="hover:text-brand-gold transition-colors">Safe Work Confined Space</a></li>
+            <li><a href="#compliance" class="hover:text-brand-gold transition-colors">HACCP & Food Safety</a></li>
+            <li><a href="#compliance" class="hover:text-brand-gold transition-colors">Certificate Verification</a></li>
+            <li><a href="#compliance" class="hover:text-brand-gold transition-colors">Insurance Auditing</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h5 class="text-xs font-mono uppercase tracking-widest text-brand-gold font-bold mb-4">WA Service Area</h5>
+          <ul class="space-y-2.5 text-slate-400">
+            <li>Perth CBD & Northbridge</li>
+            <li>Fremantle & South Metro</li>
+            <li>Joondalup & Northern Corridor</li>
+            <li>Midland & Eastern Hills</li>
+            <li>Mandurah & Regional WA</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] font-mono text-slate-500">
+        <div>
+          © 2026 Grade X Commercial Solutions Pty Ltd. All rights reserved.
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="#" class="hover:text-brand-gold transition-colors">Privacy Policy</a>
+          <a href="#" class="hover:text-brand-gold transition-colors">Terms of Service</a>
+          <a href="#" class="hover:text-brand-gold transition-colors">WHS Statement</a>
+          <a href="#heroSection" class="hover:text-brand-gold transition-colors flex items-center gap-1">
+            Back to Top <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================== -->
+  <!-- JAVASCRIPT & GSAP SCROLL ANIMATIONS        -->
+  <!-- ========================================== -->
+  <script>
+    lucide.createIcons();
+
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+
+    const comparisonSlider = document.getElementById('comparisonSlider');
+    const sliderAfterClip = document.getElementById('sliderAfterClip');
+    const sliderDivider = document.getElementById('sliderDivider');
+    let isDragging = false;
+
+    function updateSlider(e) {
+      const rect = comparisonSlider.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      let position = ((clientX - rect.left) / rect.width) * 100;
+      position = Math.max(0, Math.min(100, position));
+      sliderAfterClip.style.width = position + '%';
+      sliderDivider.style.left = position + '%';
+    }
+
+    comparisonSlider.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      updateSlider(e);
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) updateSlider(e);
+    });
+
+    comparisonSlider.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      updateSlider(e);
+    }, { passive: true });
+    window.addEventListener('touchend', () => isDragging = false);
+    window.addEventListener('touchmove', (e) => {
+      if (isDragging) updateSlider(e);
+    }, { passive: true });
+
+    function handleFormSubmit() {
+      const submitBtn = document.getElementById('submitBtn');
+      const formSuccessMessage = document.getElementById('formSuccessMessage');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>Processing Request...</span>';
+      
+      setTimeout(() => {
+        submitBtn.classList.add('hidden');
+        formSuccessMessage.classList.remove('hidden');
+      }, 700);
+    }
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    if (window.innerWidth >= 768 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      gsap.to('#heroVideoFrame', {
+        scrollTrigger: {
+          trigger: '#heroSection',
+          start: 'top top',
+          end: 'bottom top',
+          scrub: 1,
+          pin: false
+        },
+        scale: 0.94,
+        y: 60,
+        borderColor: 'rgba(212, 175, 55, 0.7)',
+        boxShadow: '0 25px 60px -15px rgba(212, 175, 55, 0.25)'
+      });
+    }
+
+    const counters = document.querySelectorAll('.counter');
+    let counted = false;
+
+    ScrollTrigger.create({
+      trigger: '#statsGrid',
+      start: 'top 85%',
+      onEnter: () => {
+        if (!counted) {
+          counted = true;
+          counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            gsap.to(counter, {
+              innerHTML: target,
+              duration: 2,
+              ease: 'power2.out',
+              snap: { innerHTML: 1 }
+            });
+          });
+        }
+      }
+    });
+
+    gsap.utils.toArray('.methodology-card').forEach((card, index) => {
+      gsap.from(card, {
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 90%',
+          toggleActions: 'play none none none'
+        },
+        opacity: 0,
+        y: 40,
+        duration: 0.7,
+        delay: (index % 4) * 0.12,
+        ease: 'power3.out'
+      });
+    });
+
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('mainHeader');
+      if (window.scrollY > 50) {
+        header.classList.add('shadow-2xl', 'shadow-black/60', 'border-brand-gold/30');
+      } else {
+        header.classList.remove('shadow-2xl', 'shadow-black/60', 'border-brand-gold/30');
+      }
+    });
+  </script>
+</body>
+</html>
