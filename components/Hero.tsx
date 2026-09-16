@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Scan, ShieldCheck, ChevronDown, CheckCircle2, Play, Pause } from 'lucide-react';
+import { ArrowRight, Scan, ShieldCheck, ChevronDown, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Hero() {
@@ -13,56 +13,54 @@ export default function Hero() {
   const overlayContentRef = useRef<HTMLDivElement>(null);
   const hudMetricsRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const [scrubProgress, setScrubProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
   const [currentTimeFormatted, setCurrentTimeFormatted] = useState('00:00');
-  const [isManualPlaying, setIsManualPlaying] = useState(false);
+  const [durationFormatted, setDurationFormatted] = useState('00:57');
+  const [progressPct, setProgressPct] = useState(0);
 
-  // Target and current time for high-performance rAF interpolation
-  const targetTimeRef = useRef(0);
-  const isScrubbingRef = useRef(false);
+  // Keep track of scroll direction and speed to dynamically accelerate / smoothly control video playback
+  const lastScrollY = useRef(0);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Fast-decode & buffer setup for instant responsive scrubbing
-    video.pause();
-    video.currentTime = 0;
+    // Start playback immediately without black screens
+    video.muted = true;
+    video.playsInline = true;
+    video.play().catch(() => {
+      // Autoplay with fallback
+    });
 
-    // Continuous 60fps / 120fps smooth linear interpolation loop (LERP)
-    let animationFrameId: number;
+    const handleTimeUpdate = () => {
+      if (!video) return;
+      const cur = video.currentTime || 0;
+      const dur = video.duration || 57;
+      const pct = Math.round((cur / dur) * 100);
+      setProgressPct(pct);
 
-    const smoothVideoPlayback = () => {
-      if (video && !video.paused && isManualPlaying) {
-        // Normal video playing
-        const mins = Math.floor(video.currentTime / 60);
-        const secs = Math.floor(video.currentTime % 60);
-        setCurrentTimeFormatted(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
-      } else if (video && !isManualPlaying && video.duration && !isNaN(video.duration)) {
-        // Ultra-smooth lerp: smoothly glide video.currentTime towards targetTimeRef
-        const diff = targetTimeRef.current - video.currentTime;
-        if (Math.abs(diff) > 0.02) {
-          // 0.25 LERP coefficient gives silky fluid response without stutter or tearing
-          video.currentTime += diff * 0.25;
-        } else {
-          video.currentTime = targetTimeRef.current;
-        }
-
-        const current = video.currentTime;
-        const mins = Math.floor(current / 60);
-        const secs = Math.floor(current % 60);
-        setCurrentTimeFormatted(`${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`);
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${pct}%`;
       }
 
-      animationFrameId = requestAnimationFrame(smoothVideoPlayback);
+      const curM = Math.floor(cur / 60);
+      const curS = Math.floor(cur % 60);
+      setCurrentTimeFormatted(`${curM.toString().padStart(2, '0')}:${curS.toString().padStart(2, '0')}`);
+
+      if (video.duration) {
+        const durM = Math.floor(video.duration / 60);
+        const durS = Math.floor(video.duration % 60);
+        setDurationFormatted(`${durM.toString().padStart(2, '0')}:${durS.toString().padStart(2, '0')}`);
+      }
     };
 
-    animationFrameId = requestAnimationFrame(smoothVideoPlayback);
-
+    video.addEventListener('timeupdate', handleTimeUpdate);
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      video.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [isManualPlaying]);
+  }, []);
 
   useGSAP(
     () => {
@@ -73,65 +71,69 @@ export default function Hero() {
       const isMobile = window.innerWidth < 768;
 
       if (prefersReducedMotion || isMobile) {
-        video.play().catch(() => {});
-        setIsManualPlaying(true);
         return;
       }
 
-      // PIN HERO SECTION FOR 450% OF VIEWPORT HEIGHT
-      // Giving the user plenty of smooth scrolling room to traverse the entire 57-second video seamlessly
+      // PIN HERO: Gives a premium cinematic viewport experience
+      // While pinned, scrolling naturally moves through the hero stages without breaking or seeking black keyframes
       const pinTrigger = ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top top',
-        end: '+=450%',
+        end: '+=200%',
         pin: true,
-        scrub: 0.8, // Smooth damping scrub
+        scrub: 0.8,
         anticipatePin: 1,
         onUpdate: (self) => {
-          if (isManualPlaying) return;
-          const progress = self.progress;
-          setScrubProgress(Math.round(progress * 100));
+          // Dynamic Playback Rate: When user scrolls down faster, video speeds up forward (1.5x - 2.5x)
+          // When scrolling up, video plays in reverse / normalizes without any seek blackout
+          const scrollDelta = self.getVelocity();
+          if (video && !video.paused) {
+            if (scrollDelta > 500) {
+              video.playbackRate = 2.0; // Fast-forward smoothly through duct
+            } else if (scrollDelta < -500) {
+              video.playbackRate = 0.5; // Slow down
+            } else {
+              video.playbackRate = 1.0; // Perfect standard 1.0x playback
+            }
 
-          if (progressBarRef.current) {
-            progressBarRef.current.style.width = `${progress * 100}%`;
-          }
-
-          if (video.duration && !isNaN(video.duration)) {
-            // Update target time for the rAF lerp engine
-            targetTimeRef.current = progress * video.duration;
+            // Reset playbackRate to 1.0 after scrolling pauses
+            if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+            scrollTimeout.current = setTimeout(() => {
+              if (video) video.playbackRate = 1.0;
+            }, 250);
           }
         },
       });
 
-      // Overlay text transitions tied to video progression
+      // Overlay text transitions as user scrolls
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: 'top top',
-          end: '+=450%',
+          end: '+=200%',
           scrub: 1,
         },
       });
 
-      // 1. Initial headline smoothly fades and lifts out in the first 20%
+      // 1. Initial headline smoothly fades & lifts
       tl.to(
         overlayContentRef.current,
         {
-          y: -120,
+          y: -100,
           opacity: 0,
-          scale: 0.94,
+          scale: 0.96,
           ease: 'power1.in',
         },
         0
       );
 
-      // 2. Telemetry HUD card smoothly emerges during mid-duct extraction (30% to 75%)
+      // 2. HUD Telemetry Card emerges mid-scroll
       tl.fromTo(
         hudMetricsRef.current,
         {
           opacity: 0,
-          scale: 0.88,
-          y: 60,
+          scale: 0.9,
+          y: 50,
         },
         {
           opacity: 1,
@@ -139,14 +141,14 @@ export default function Hero() {
           y: 0,
           ease: 'power2.out',
         },
-        0.25
+        0.3
       );
 
       tl.to(
         hudMetricsRef.current,
         {
           opacity: 0,
-          y: -50,
+          y: -40,
           scale: 0.95,
           ease: 'power2.in',
         },
@@ -157,66 +159,83 @@ export default function Hero() {
         pinTrigger.kill();
       };
     },
-    { scope: containerRef, dependencies: [isManualPlaying] }
+    { scope: containerRef }
   );
 
   const togglePlay = () => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
       videoRef.current.play();
-      setIsManualPlaying(true);
+      setIsPlaying(true);
     } else {
       videoRef.current.pause();
-      setIsManualPlaying(false);
+      setIsPlaying(false);
     }
+  };
+
+  const toggleMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !videoRef.current.muted;
+    setIsMuted(videoRef.current.muted);
   };
 
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black" id="heroSection">
       
-      {/* 1. FULL WIDTH / FULL VIEWPORT BACKGROUND VIDEO */}
+      {/* 1. FULL WIDTH / FULL VIEWPORT BACKGROUND VIDEO (Always Continuous & Vibrant) */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#03070E]">
         <video
           ref={videoRef}
           src="/videos/hero-robot-clean.mp4"
           poster="/images/hero-poster.jpg"
+          autoPlay
+          loop
           muted
           playsInline
           preload="auto"
-          className="w-full h-full object-cover opacity-90"
+          className="w-full h-full object-cover opacity-95 transition-opacity duration-500"
         />
         
-        {/* Subtle Vignette & Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-black/30 to-black/70 pointer-events-none" />
-        <div className="absolute inset-0 blueprint-grid opacity-25 pointer-events-none" />
+        {/* Cinematic Vignette Overlay (Does NOT darken video to black) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian/90 via-black/20 to-black/60 pointer-events-none" />
+        <div className="absolute inset-0 blueprint-grid opacity-20 pointer-events-none" />
       </div>
 
-      {/* 2. TOP HUD TELEMETRY BAR */}
+      {/* 2. TOP HUD TELEMETRY BAR & LIVE VIDEO CONTROLS */}
       <div className="absolute top-20 inset-x-0 z-20 px-6 sm:px-12 flex justify-between items-center text-xs font-mono text-brand-gold-light">
-        <div className="flex items-center gap-2.5 bg-black/70 border border-brand-border/40 px-3.5 py-1.5 rounded-full backdrop-blur-md">
+        <div className="flex items-center gap-2.5 bg-black/75 border border-brand-border/40 px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-lg">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>ROBOTIC CRAWLER // LIVE DUCT PENETRATION</span>
+          <span>ROBOTIC CRAWLER // LIVE DUCT SCANNER</span>
         </div>
         
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-4 bg-black/70 border border-brand-border/40 px-4 py-1.5 rounded-full backdrop-blur-md">
-            <span className="text-slate-400">TIMECODE: <strong className="text-white font-bold">{currentTimeFormatted} / 00:57</strong></span>
-            <span className="text-slate-400">DUCT REACH: <strong className="text-brand-gold font-bold">45M</strong></span>
-            <span className="text-slate-400">SCRUB: <strong className="text-brand-gold-light font-bold">{scrubProgress}%</strong></span>
+          <div className="hidden sm:flex items-center gap-4 bg-black/75 border border-brand-border/40 px-4 py-1.5 rounded-full backdrop-blur-md shadow-lg">
+            <span className="text-slate-300">TIMECODE: <strong className="text-white font-bold">{currentTimeFormatted} / {durationFormatted}</strong></span>
+            <span className="text-slate-300">DEGREASE TEMP: <strong className="text-brand-gold font-bold">140°C</strong></span>
+            <span className="text-slate-300">STATUS: <strong className="text-emerald-400 font-bold">{isPlaying ? 'LIVE STREAM' : 'PAUSED'}</strong></span>
           </div>
 
-          {/* Manual Play/Pause override */}
+          {/* Audio Mute/Unmute */}
+          <button
+            onClick={toggleMute}
+            aria-label="Toggle Audio"
+            className="bg-black/80 hover:bg-brand-gold hover:text-brand-obsidian border border-brand-gold/50 p-2 rounded-full transition-all shadow-lg text-brand-gold"
+          >
+            {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
+          </button>
+
+          {/* Play / Pause Toggle Button */}
           <button
             onClick={togglePlay}
-            className="bg-black/80 hover:bg-brand-gold hover:text-brand-obsidian border border-brand-gold/50 px-3 py-1.5 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-lg shadow-black/60"
+            className="bg-black/80 hover:bg-brand-gold hover:text-brand-obsidian border border-brand-gold/50 px-3.5 py-1.5 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-lg text-brand-gold"
           >
-            {isManualPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span>{isManualPlaying ? 'PAUSE AUTO' : 'AUTOPLAY'}</span>
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
           </button>
         </div>
       </div>
 
-      {/* 3. HERO HEADLINE & CTA (Fades seamlessly on scroll) */}
+      {/* 3. HERO HEADLINE & CTA (Fades gracefully on scroll) */}
       <div
         ref={overlayContentRef}
         className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 sm:px-8 pointer-events-auto"
@@ -237,7 +256,7 @@ export default function Hero() {
         </h1>
 
         <p className="text-base sm:text-xl text-slate-200 max-w-3xl font-normal leading-relaxed mb-10 drop-shadow-md">
-          Scroll down to pilot our 4K robotic crawler live through the exhaust system — eliminating fuel load down to bare metal with zero confined-space hazard.
+          Advanced remote-inspection robotics, micron-grade grease measurement, and high-pressure thermal decontamination for commercial kitchen exhaust systems.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto">
@@ -262,7 +281,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 4. MID-SCROLL DUCT TELEMETRY HUD (Appears throughout video scrub) */}
+      {/* 4. MID-SCROLL DUCT TELEMETRY HUD (Appears over continuous video) */}
       <div
         ref={hudMetricsRef}
         className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 sm:px-8 pointer-events-none opacity-0"
@@ -294,19 +313,19 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 5. BOTTOM 57-SECOND VIDEO PROGRESS SCRUB BAR */}
+      {/* 5. BOTTOM CONTINUOUS VIDEO PROGRESS BAR */}
       <div className="absolute bottom-6 inset-x-0 z-20 px-6 sm:px-12 flex flex-col items-center pointer-events-none">
         <div className="flex items-center gap-2 text-xs font-mono text-brand-gold uppercase tracking-widest mb-2 font-semibold">
-          <span className="animate-pulse">Scroll down to pilot 57s duct run</span>
+          <span>Scroll down to explore facility benefits</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </div>
         
-        {/* Full-width responsive progress bar with gold shimmer */}
+        {/* Responsive progress bar */}
         <div className="w-full max-w-2xl h-2 bg-white/15 rounded-full overflow-hidden backdrop-blur-md border border-white/10 shadow-inner">
           <div
             ref={progressBarRef}
             className="h-full bg-gold-gradient shadow-[0_0_15px_#D4AF37] transition-all"
-            style={{ width: '0%' }}
+            style={{ width: `${progressPct}%` }}
           />
         </div>
       </div>
