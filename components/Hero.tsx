@@ -1,24 +1,24 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Scan, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Scan, ShieldCheck, Play, Pause, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
-  const hudRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
 
   useGSAP(
     () => {
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const isMobile = window.innerWidth < 768;
 
-      // HUD elements entrance animation on load
+      // 1. Initial High-Impact Entrance Sequence
       const tl = gsap.timeline();
       tl.from('.hero-badge', { y: -30, opacity: 0, duration: 0.8, ease: 'power3.out' })
         .from('.hero-headline', { y: 40, opacity: 0, duration: 1, ease: 'power3.out' }, '-=0.5')
@@ -26,73 +26,69 @@ export default function Hero() {
         .from('.hero-cta', { scale: 0.9, opacity: 0, duration: 0.7, ease: 'back.out(1.7)' }, '-=0.5')
         .from('.hero-hud-frame', { y: 60, opacity: 0, duration: 1, ease: 'power3.out' }, '-=0.5');
 
-      if (prefersReducedMotion || isMobile) {
-        if (videoRef.current) {
-          videoRef.current.play().catch(() => {});
-        }
-        return;
-      }
-
       const video = videoRef.current;
       if (!video) return;
 
-      // 1. Scroll-scrub the video playback directly
-      video.pause();
-      const scrub = { time: 0 };
+      // Play video immediately
+      video.play().catch(() => {});
 
-      const handleLoadedMetadata = () => {
-        gsap.to(scrub, {
-          time: video.duration || 10,
-          ease: 'none',
-          onUpdate: () => {
-            if (video.readyState >= 2) {
-              video.currentTime = scrub.time;
-            }
-          },
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: 'top top',
-            end: '+=150%',
-            scrub: 1,
-          },
-        });
-      };
-
-      if (video.readyState >= 1) {
-        handleLoadedMetadata();
-      } else {
-        video.addEventListener('loadedmetadata', handleLoadedMetadata);
+      if (prefersReducedMotion || isMobile) {
+        return;
       }
 
-      // 2. Pin and scale the video viewport frame
+      // 2. Video Viewport Scaling & Glow on Scroll
       gsap.to(frameRef.current, {
-        scale: 0.85,
+        scale: 0.88,
+        y: 40,
         borderRadius: '24px',
-        borderColor: 'rgba(212, 175, 55, 0.65)',
-        boxShadow: '0 25px 60px -15px rgba(212, 175, 55, 0.25)',
+        borderColor: 'rgba(212, 175, 55, 0.8)',
+        boxShadow: '0 25px 70px -15px rgba(212, 175, 55, 0.35)',
         ease: 'none',
         scrollTrigger: {
           trigger: containerRef.current,
           start: 'top top',
-          end: '+=150%',
-          scrub: 1,
-          pin: true,
+          end: 'bottom top',
+          scrub: 1.2,
+        },
+      });
+
+      // 3. Scrub video playback based on scroll position
+      ScrollTrigger.create({
+        trigger: containerRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 1,
+        onUpdate: (self) => {
+          if (video && video.duration && !isNaN(video.duration)) {
+            video.currentTime = self.progress * video.duration;
+          }
         },
       });
     },
     { scope: containerRef }
   );
 
+  const togglePlay = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play();
+      setIsPlaying(true);
+    } else {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
   return (
     <section ref={containerRef} className="relative min-h-screen flex flex-col items-center justify-start pt-10 pb-20 overflow-hidden" id="heroSection">
       
-      {/* Background Ambient Glows */}
+      {/* Background Ambient Glows & Blueprint Elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-brand-navy-light/40 rounded-full blur-[140px]"></div>
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[450px] h-[300px] bg-brand-gold/10 rounded-full blur-[100px]"></div>
       </div>
 
-      <div ref={hudRef} className="max-w-7xl mx-auto px-4 sm:px-8 w-full relative z-10 flex flex-col items-center text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 w-full relative z-10 flex flex-col items-center text-center">
         
         {/* WA Exclusivity Badge */}
         <div className="hero-badge inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-brand-gold/40 bg-brand-navy/80 backdrop-blur-md mb-8 shadow-xl shadow-black/50">
@@ -119,8 +115,8 @@ export default function Hero() {
         {/* CTA Hub */}
         <div className="hero-cta flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-14">
           <motion.a
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             href="#quote"
             className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-md text-sm font-mono uppercase tracking-wider font-bold bg-gold-gradient text-brand-obsidian shadow-xl shadow-brand-gold/25 hover:shadow-brand-gold/40 transition-all duration-300"
           >
@@ -128,8 +124,8 @@ export default function Hero() {
             <ArrowRight className="w-4 h-4 ml-2" />
           </motion.a>
           <motion.a
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             href="#technology"
             className="w-full sm:w-auto inline-flex items-center justify-center px-7 py-4 rounded-md text-sm font-mono uppercase tracking-wider font-semibold border border-brand-border/60 hover:border-brand-gold text-slate-200 hover:text-white bg-brand-navy/60 hover:bg-brand-navy-light/60 backdrop-blur-md transition-all duration-300"
           >
@@ -138,55 +134,63 @@ export default function Hero() {
           </motion.a>
         </div>
 
-        {/* Signature Hero Video Viewport */}
+        {/* Signature Hero Video Viewport with Live HUD */}
         <div className="w-full max-w-5xl mx-auto relative perspective-1000 hero-hud-frame">
           <div ref={frameRef} className="relative rounded-2xl overflow-hidden border-2 border-brand-gold/30 bg-brand-obsidian shadow-2xl shadow-black/80 transition-all">
             
             {/* Top Video HUD Bar */}
-            <div className="absolute top-0 inset-x-0 bg-gradient-to-b from-black/85 to-transparent p-4 z-20 flex justify-between items-center text-xs font-mono text-brand-gold-light/90 pointer-events-none">
+            <div className="absolute top-0 inset-x-0 bg-gradient-to-b from-black/90 to-transparent p-4 z-20 flex justify-between items-center text-xs font-mono text-brand-gold-light/90">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>ROBOTIC CAM_01 // LIVE FEED 4K</span>
+                <span>ROBOTIC CAM_01 // LIVE DUCT SCANNER</span>
               </div>
-              <div className="hidden sm:flex items-center gap-4 text-slate-400">
-                <span>DUCT SECTION: WA-MTR-08</span>
-                <span>THERMAL STEAM: 140°C</span>
-                <span className="text-brand-gold">CALIBRATED</span>
+              <div className="flex items-center gap-4 text-slate-300">
+                <span className="hidden sm:inline">THERMAL STEAM: 140°C</span>
+                <button 
+                  onClick={togglePlay}
+                  className="bg-black/60 hover:bg-brand-gold hover:text-brand-obsidian border border-brand-gold/40 px-2.5 py-1 rounded text-[10px] uppercase font-bold flex items-center gap-1 transition-colors"
+                >
+                  {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                  <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+                </button>
               </div>
             </div>
 
-            {/* Video Container */}
-            <div className="relative w-full aspect-video sm:h-[480px] bg-slate-950 flex items-center justify-center overflow-hidden">
+            {/* Video Canvas Container */}
+            <div className="relative w-full aspect-video sm:h-[500px] bg-slate-950 flex items-center justify-center overflow-hidden">
               <video
                 ref={videoRef}
                 src="/videos/hero-robot-clean.mp4"
                 poster="/images/hero-poster.jpg"
+                autoPlay
                 muted
+                loop
                 playsInline
-                preload="auto"
                 className="w-full h-full object-cover opacity-90 scale-105"
               />
 
               {/* Blueprint Target Reticle */}
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <div className="w-48 h-48 border border-brand-gold/30 rounded-full flex items-center justify-center relative">
-                  <div className="absolute w-full h-[1px] bg-brand-gold/20"></div>
-                  <div className="absolute h-full w-[1px] bg-brand-gold/20"></div>
-                  <div className="w-24 h-24 border border-dashed border-brand-gold/50 rounded-full animate-spin" style={{ animationDuration: '20s' }}></div>
-                  <div className="w-3 h-3 bg-brand-gold/80 rounded-full"></div>
+                <div className="w-52 h-52 border border-brand-gold/30 rounded-full flex items-center justify-center relative">
+                  <div className="absolute w-full h-[1px] bg-brand-gold/25"></div>
+                  <div className="absolute h-full w-[1px] bg-brand-gold/25"></div>
+                  <div className="w-28 h-28 border border-dashed border-brand-gold/50 rounded-full animate-spin" style={{ animationDuration: '22s' }}></div>
+                  <div className="w-3.5 h-3.5 bg-brand-gold rounded-full shadow-[0_0_10px_#D4AF37]"></div>
                 </div>
               </div>
 
               {/* Bottom Video HUD Info Bar */}
               <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 sm:p-6 z-20 flex flex-wrap justify-between items-end gap-4 pointer-events-none">
                 <div className="text-left">
-                  <p className="text-[11px] font-mono text-brand-gold uppercase tracking-widest">Inspection & Scrape Unit</p>
-                  <h4 className="text-base sm:text-lg font-display font-bold text-white">Continuous Duct Penetration: Up to 45 Metres</h4>
+                  <p className="text-[11px] font-mono text-brand-gold uppercase tracking-widest flex items-center gap-1.5">
+                    <RefreshCw className="w-3 h-3 animate-spin" /> Live Automated Crawl
+                  </p>
+                  <h4 className="text-base sm:text-lg font-display font-bold text-white">Continuous Duct Scour: 45m Range</h4>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="bg-black/70 border border-brand-gold/30 px-3 py-1.5 rounded font-mono text-xs text-brand-gold flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-brand-gold" />
-                    <span>Zero Confined Space Hazard</span>
+                    <span>Zero Confined Space Risk</span>
                   </div>
                 </div>
               </div>

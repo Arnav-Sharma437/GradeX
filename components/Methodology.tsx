@@ -1,9 +1,11 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { Workflow, Camera, Gauge, Shield, Flame, RefreshCw, CheckCircle2, Check, FileText } from 'lucide-react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Workflow, Camera, Gauge, Shield, Flame, RefreshCw, CheckCircle2, Check, FileText, ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const steps = [
   {
@@ -75,10 +77,11 @@ const steps = [
 export default function Methodology() {
   const containerRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const [activeStep, setActiveStep] = useState(0);
 
   useGSAP(
     () => {
-      // Draw progress line tied to scroll scrub
+      // Dynamic Progress Line
       gsap.to(progressBarRef.current, {
         scaleX: 1,
         ease: 'none',
@@ -86,14 +89,14 @@ export default function Methodology() {
           trigger: containerRef.current,
           start: 'top 70%',
           end: 'bottom 80%',
-          scrub: 0.5,
+          scrub: 0.4,
         },
       });
 
-      // Stagger card reveals as scroll reaches each row
+      // Staggered Step Cards Reveal
       gsap.utils.toArray<HTMLElement>('.methodology-step-card').forEach((card, i) => {
         gsap.from(card, {
-          y: 45,
+          y: 50,
           opacity: 0,
           duration: 0.7,
           ease: 'power3.out',
@@ -101,6 +104,7 @@ export default function Methodology() {
             trigger: card,
             start: 'top 88%',
             toggleActions: 'play none none none',
+            onEnter: () => setActiveStep(i),
           },
         });
       });
@@ -127,22 +131,25 @@ export default function Methodology() {
         </div>
 
         {/* Scroll Progress Line Indicator */}
-        <div className="w-full h-1 bg-brand-navy-light rounded-full mb-10 overflow-hidden relative">
+        <div className="w-full h-1.5 bg-brand-navy-light rounded-full mb-10 overflow-hidden relative shadow-inner">
           <div
             ref={progressBarRef}
-            className="h-full w-full bg-gold-gradient origin-left scale-x-0 transition-transform"
+            className="h-full w-full bg-gold-gradient origin-left scale-x-0 transition-transform shadow-[0_0_12px_#D4AF37]"
           />
         </div>
 
-        {/* 8-Step Grid */}
+        {/* 8-Step Grid with Framer Motion hover elevation */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
           {steps.map((step, idx) => {
             const Icon = step.icon;
             const isLast = idx === 7;
+            const isActive = activeStep === idx;
             return (
-              <div
+              <motion.div
                 key={step.num}
-                className={`methodology-step-card gold-glass-card rounded-xl p-6 relative border-l-2 flex flex-col justify-between ${isLast ? 'border-l-brand-gold shadow-lg shadow-brand-gold/10' : 'border-l-brand-gold/50'}`}
+                whileHover={{ y: -6, scale: 1.02 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 20 }}
+                className={`methodology-step-card gold-glass-card rounded-xl p-6 relative border-l-2 flex flex-col justify-between cursor-pointer ${isLast ? 'border-l-brand-gold shadow-lg shadow-brand-gold/15' : isActive ? 'border-l-brand-gold' : 'border-l-brand-gold/40'}`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -156,11 +163,14 @@ export default function Methodology() {
                     {step.desc}
                   </p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center gap-1.5">
-                  <Icon className="w-3.5 h-3.5 text-brand-gold" />
-                  <span>{step.metric}</span>
+                <div className="mt-4 pt-3 border-t border-white/5 text-[11px] font-mono text-brand-steel flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="w-3.5 h-3.5 text-brand-gold" />
+                    <span>{step.metric}</span>
+                  </div>
+                  <ArrowRight className="w-3 h-3 text-brand-gold/60" />
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
