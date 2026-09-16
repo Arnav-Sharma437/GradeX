@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight, Scan, ShieldCheck, ChevronDown, CheckCircle2, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { ArrowRight, Scan, ShieldCheck, ChevronDown, CheckCircle2, Play, Pause, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Hero() {
@@ -13,54 +13,89 @@ export default function Hero() {
   const overlayContentRef = useRef<HTMLDivElement>(null);
   const hudMetricsRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const [isPlaying, setIsPlaying] = useState(true);
+
+  // Mode: true = Autoplay Video, false = 100% Scroll-Locked Driven (default)
+  const [isAutoplay, setIsAutoplay] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const [currentTimeFormatted, setCurrentTimeFormatted] = useState('00:00');
   const [durationFormatted, setDurationFormatted] = useState('00:57');
   const [progressPct, setProgressPct] = useState(0);
 
-  // Keep track of scroll direction and speed to dynamically accelerate / smoothly control video playback
-  const lastScrollY = useRef(0);
-  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  // Target time and current scrub values
+  const targetTimeRef = useRef(0);
+  const scrollTriggerInstance = useRef<ScrollTrigger | null>(null);
 
+  // Fast smooth video time update loop (LERP) without black screens
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    // Start playback immediately without black screens
-    video.muted = true;
-    video.playsInline = true;
-    video.play().catch(() => {
-      // Autoplay with fallback
-    });
+    if (!isAutoplay) {
+      video.pause();
+    } else {
+      video.play().catch(() => {});
+    }
 
-    const handleTimeUpdate = () => {
+    let rafId: number;
+
+    const updateLoop = () => {
       if (!video) return;
-      const cur = video.currentTime || 0;
-      const dur = video.duration || 57;
-      const pct = Math.round((cur / dur) * 100);
-      setProgressPct(pct);
 
-      if (progressBarRef.current) {
-        progressBarRef.current.style.width = `${pct}%`;
+      if (isAutoplay) {
+        // Mode 1: Normal Autoplay
+        const cur = video.currentTime || 0;
+        const dur = video.duration || 57;
+        const pct = Math.min(100, Math.round((cur / dur) * 100));
+        setProgressPct(pct);
+
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width = `${pct}%`;
+        }
+
+        const curM = Math.floor(cur / 60);
+        const curS = Math.floor(cur % 60);
+        setCurrentTimeFormatted(`${curM.toString().padStart(2, '0')}:${curS.toString().padStart(2, '0')}`);
+      } else {
+        // Mode 2: 100% Scroll-Driven
+        // Silky smooth interpolation to avoid browser decoder black frames
+        if (video.duration && !isNaN(video.duration)) {
+          const diff = targetTimeRef.current - video.currentTime;
+          if (Math.abs(diff) > 0.04) {
+            video.currentTime += diff * 0.35;
+          } else {
+            video.currentTime = targetTimeRef.current;
+          }
+
+          const cur = video.currentTime;
+          const dur = video.duration;
+          const pct = Math.min(100, Math.round((cur / dur) * 100));
+          setProgressPct(pct);
+
+          if (progressBarRef.current) {
+            progressBarRef.current.style.width = `${pct}%`;
+          }
+
+          const curM = Math.floor(cur / 60);
+          const curS = Math.floor(cur % 60);
+          setCurrentTimeFormatted(`${curM.toString().padStart(2, '0')}:${curS.toString().padStart(2, '0')}`);
+        }
       }
-
-      const curM = Math.floor(cur / 60);
-      const curS = Math.floor(cur % 60);
-      setCurrentTimeFormatted(`${curM.toString().padStart(2, '0')}:${curS.toString().padStart(2, '0')}`);
 
       if (video.duration) {
         const durM = Math.floor(video.duration / 60);
         const durS = Math.floor(video.duration % 60);
         setDurationFormatted(`${durM.toString().padStart(2, '0')}:${durS.toString().padStart(2, '0')}`);
       }
+
+      rafId = requestAnimationFrame(updateLoop);
     };
 
-    video.addEventListener('timeupdate', handleTimeUpdate);
+    rafId = requestAnimationFrame(updateLoop);
+
     return () => {
-      video.removeEventListener('timeupdate', handleTimeUpdate);
+      cancelAnimationFrame(rafId);
     };
-  }, []);
+  }, [isAutoplay]);
 
   useGSAP(
     () => {
@@ -71,69 +106,59 @@ export default function Hero() {
       const isMobile = window.innerWidth < 768;
 
       if (prefersReducedMotion || isMobile) {
+        video.play().catch(() => {});
+        setIsAutoplay(true);
         return;
       }
 
-      // PIN HERO: Gives a premium cinematic viewport experience
-      // While pinned, scrolling naturally moves through the hero stages without breaking or seeking black keyframes
+      // PIN HERO SECTION STRICTLY UNTIL 100% OF THE 57-SECOND VIDEO IS SCROLLED
+      // Total scroll distance: 500vh (giving smooth precision to scrub all 57s)
       const pinTrigger = ScrollTrigger.create({
         trigger: containerRef.current,
         start: 'top top',
-        end: '+=200%',
+        end: '+=500%',
         pin: true,
-        scrub: 0.8,
+        scrub: 1,
         anticipatePin: 1,
         onUpdate: (self) => {
-          // Dynamic Playback Rate: When user scrolls down faster, video speeds up forward (1.5x - 2.5x)
-          // When scrolling up, video plays in reverse / normalizes without any seek blackout
-          const scrollDelta = self.getVelocity();
-          if (video && !video.paused) {
-            if (scrollDelta > 500) {
-              video.playbackRate = 2.0; // Fast-forward smoothly through duct
-            } else if (scrollDelta < -500) {
-              video.playbackRate = 0.5; // Slow down
-            } else {
-              video.playbackRate = 1.0; // Perfect standard 1.0x playback
-            }
-
-            // Reset playbackRate to 1.0 after scrolling pauses
-            if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-            scrollTimeout.current = setTimeout(() => {
-              if (video) video.playbackRate = 1.0;
-            }, 250);
+          if (!isAutoplay && video.duration && !isNaN(video.duration)) {
+            // Video progress is locked directly to scroll progress
+            targetTimeRef.current = self.progress * video.duration;
           }
         },
       });
 
-      // Overlay text transitions as user scrolls
+      scrollTriggerInstance.current = pinTrigger;
+
+      // Overlay text transitions synced with scroll
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: 'top top',
-          end: '+=200%',
+          end: '+=500%',
           scrub: 1,
         },
       });
 
-      // 1. Initial headline smoothly fades & lifts
+      // 1. Initial headline smoothly fades and lifts out in the first 15%
       tl.to(
         overlayContentRef.current,
         {
-          y: -100,
+          y: -120,
           opacity: 0,
-          scale: 0.96,
+          scale: 0.94,
           ease: 'power1.in',
         },
         0
       );
 
-      // 2. HUD Telemetry Card emerges mid-scroll
+      // 2. Telemetry HUD card smoothly emerges during mid-duct extraction (25% to 75%)
       tl.fromTo(
         hudMetricsRef.current,
         {
           opacity: 0,
-          scale: 0.9,
-          y: 50,
+          scale: 0.88,
+          y: 60,
         },
         {
           opacity: 1,
@@ -141,14 +166,14 @@ export default function Hero() {
           y: 0,
           ease: 'power2.out',
         },
-        0.3
+        0.2
       );
 
       tl.to(
         hudMetricsRef.current,
         {
           opacity: 0,
-          y: -40,
+          y: -50,
           scale: 0.95,
           ease: 'power2.in',
         },
@@ -159,17 +184,19 @@ export default function Hero() {
         pinTrigger.kill();
       };
     },
-    { scope: containerRef }
+    { scope: containerRef, dependencies: [isAutoplay] }
   );
 
-  const togglePlay = () => {
+  const toggleAutoplayMode = () => {
     if (!videoRef.current) return;
-    if (videoRef.current.paused) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    } else {
+    if (isAutoplay) {
+      // Switch back to Scroll-Locked Mode
       videoRef.current.pause();
-      setIsPlaying(false);
+      setIsAutoplay(false);
+    } else {
+      // Switch to Autoplay Loop Mode
+      videoRef.current.play().catch(() => {});
+      setIsAutoplay(true);
     }
   };
 
@@ -182,26 +209,25 @@ export default function Hero() {
   return (
     <section ref={containerRef} className="relative w-full h-screen overflow-hidden bg-black" id="heroSection">
       
-      {/* 1. FULL WIDTH / FULL VIEWPORT BACKGROUND VIDEO (Always Continuous & Vibrant) */}
+      {/* 1. FULL WIDTH / FULL VIEWPORT BACKGROUND VIDEO */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#03070E]">
         <video
           ref={videoRef}
           src="/videos/hero-robot-clean.mp4"
           poster="/images/hero-poster.jpg"
-          autoPlay
-          loop
-          muted
+          loop={isAutoplay}
+          muted={isMuted}
           playsInline
           preload="auto"
-          className="w-full h-full object-cover opacity-95 transition-opacity duration-500"
+          className="w-full h-full object-cover opacity-95 transition-opacity duration-300"
         />
         
-        {/* Cinematic Vignette Overlay (Does NOT darken video to black) */}
+        {/* Subtle Vignette & Blueprint Overlays */}
         <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian/90 via-black/20 to-black/60 pointer-events-none" />
         <div className="absolute inset-0 blueprint-grid opacity-20 pointer-events-none" />
       </div>
 
-      {/* 2. TOP HUD TELEMETRY BAR & LIVE VIDEO CONTROLS */}
+      {/* 2. TOP HUD TELEMETRY BAR & DUAL-MODE CONTROLS */}
       <div className="absolute top-20 inset-x-0 z-20 px-6 sm:px-12 flex justify-between items-center text-xs font-mono text-brand-gold-light">
         <div className="flex items-center gap-2.5 bg-black/75 border border-brand-border/40 px-3.5 py-1.5 rounded-full backdrop-blur-md shadow-lg">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -210,9 +236,15 @@ export default function Hero() {
         
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-4 bg-black/75 border border-brand-border/40 px-4 py-1.5 rounded-full backdrop-blur-md shadow-lg">
-            <span className="text-slate-300">TIMECODE: <strong className="text-white font-bold">{currentTimeFormatted} / {durationFormatted}</strong></span>
-            <span className="text-slate-300">DEGREASE TEMP: <strong className="text-brand-gold font-bold">140°C</strong></span>
-            <span className="text-slate-300">STATUS: <strong className="text-emerald-400 font-bold">{isPlaying ? 'LIVE STREAM' : 'PAUSED'}</strong></span>
+            <span className="text-slate-300">
+              TIMECODE: <strong className="text-white font-bold">{currentTimeFormatted} / {durationFormatted}</strong>
+            </span>
+            <span className="text-slate-300">
+              MODE: <strong className="text-brand-gold font-bold">{isAutoplay ? 'AUTOPLAY LOOP' : 'SCROLL-DRIVEN'}</strong>
+            </span>
+            <span className="text-slate-300">
+              PROGRESS: <strong className="text-brand-gold-light font-bold">{progressPct}%</strong>
+            </span>
           </div>
 
           {/* Audio Mute/Unmute */}
@@ -224,18 +256,22 @@ export default function Hero() {
             {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
           </button>
 
-          {/* Play / Pause Toggle Button */}
+          {/* Autoplay vs Scroll-Lock Mode Button */}
           <button
-            onClick={togglePlay}
-            className="bg-black/80 hover:bg-brand-gold hover:text-brand-obsidian border border-brand-gold/50 px-3.5 py-1.5 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-lg text-brand-gold"
+            onClick={toggleAutoplayMode}
+            className={`px-4 py-1.5 rounded-full text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all shadow-lg border ${
+              isAutoplay
+                ? 'bg-brand-gold text-brand-obsidian border-brand-gold shadow-brand-gold/20'
+                : 'bg-black/80 text-brand-gold border-brand-gold/50 hover:bg-brand-gold hover:text-brand-obsidian'
+            }`}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+            {isAutoplay ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+            <span>{isAutoplay ? 'SWITCH TO SCROLL-LOCK' : 'ENABLE AUTOPLAY'}</span>
           </button>
         </div>
       </div>
 
-      {/* 3. HERO HEADLINE & CTA (Fades gracefully on scroll) */}
+      {/* 3. HERO HEADLINE & CTA (Fades seamlessly on scroll) */}
       <div
         ref={overlayContentRef}
         className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-4 sm:px-8 pointer-events-auto"
@@ -256,7 +292,7 @@ export default function Hero() {
         </h1>
 
         <p className="text-base sm:text-xl text-slate-200 max-w-3xl font-normal leading-relaxed mb-10 drop-shadow-md">
-          Advanced remote-inspection robotics, micron-grade grease measurement, and high-pressure thermal decontamination for commercial kitchen exhaust systems.
+          Scroll down to pilot our 4K robotic crawler live through the exhaust system — eliminating fuel load down to bare metal with zero confined-space hazard.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-5 w-full sm:w-auto">
@@ -313,18 +349,18 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 5. BOTTOM CONTINUOUS VIDEO PROGRESS BAR */}
+      {/* 5. BOTTOM 57-SECOND VIDEO PROGRESS BAR (Strict Scroll Lock Feedback) */}
       <div className="absolute bottom-6 inset-x-0 z-20 px-6 sm:px-12 flex flex-col items-center pointer-events-none">
         <div className="flex items-center gap-2 text-xs font-mono text-brand-gold uppercase tracking-widest mb-2 font-semibold">
-          <span>Scroll down to explore facility benefits</span>
+          <span>{isAutoplay ? 'Autoplaying video run' : 'Scroll down to pilot full 57s duct run'}</span>
           <ChevronDown className="w-4 h-4 animate-bounce" />
         </div>
         
-        {/* Responsive progress bar */}
-        <div className="w-full max-w-2xl h-2 bg-white/15 rounded-full overflow-hidden backdrop-blur-md border border-white/10 shadow-inner">
+        {/* Full-width responsive progress bar */}
+        <div className="w-full max-w-2xl h-2.5 bg-white/15 rounded-full overflow-hidden backdrop-blur-md border border-brand-gold/30 shadow-[0_0_15px_rgba(0,0,0,0.8)]">
           <div
             ref={progressBarRef}
-            className="h-full bg-gold-gradient shadow-[0_0_15px_#D4AF37] transition-all"
+            className="h-full bg-gold-gradient shadow-[0_0_15px_#D4AF37] transition-all duration-75"
             style={{ width: `${progressPct}%` }}
           />
         </div>
