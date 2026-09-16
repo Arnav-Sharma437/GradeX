@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
+import RobotShowcase from '@/components/RobotShowcase';
 import Differentiator from '@/components/Differentiator';
 import WhyRobotic from '@/components/WhyRobotic';
 import Methodology from '@/components/Methodology';
@@ -14,6 +15,7 @@ export default function Home() {
     <main className="min-h-screen bg-brand-obsidian relative overflow-x-hidden">
       <Navbar />
       <Hero />
+      <RobotShowcase />
       <Differentiator />
       <WhyRobotic />
       <Methodology />
